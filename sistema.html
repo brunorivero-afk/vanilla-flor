@@ -18,7 +18,7 @@
     --rose: #c98f93; --rose-wash: #f6e4e3; --sage: #8fa588; --sage-wash: #e6ede2;
     --lilac: #a996c4; --lilac-wash: #ece6f4; --sky: #8fb1cf; --sky-wash: #e4edf5;
     --onyx: #2b2522; --red: #b5534d; --red-wash: #f7e2df;
-    --c-loja: #c98f93; --c-b2b: #3d3430; --c-clube: #8fa588; --c-revenda: #b08d57;
+    --c-loja: #c98f93; --c-b2b: #3d3430; --c-clube: #8fa588; --c-circulo: #a996c4; --c-revenda: #b08d57;
     --serif: 'Cormorant Garamond', Georgia, serif; --sans: 'Jost', 'Helvetica Neue', Arial, sans-serif; --script: 'Pinyon Script', cursive;
     --radius: 18px;
   }
@@ -92,6 +92,7 @@
   .t-b2b { background: #ece7e3; color: #3d3430; }
   .t-clube { background: var(--sage-wash); color: #5f7a59; }
   .t-revenda { background: var(--gold-wash); color: var(--gold-deep); }
+  .t-circulo { background: var(--lilac-wash); color: #6f5d8f; }
   .pill-ok { background: var(--sage-wash); color: #4f7a49; border-radius: 999px; padding: 2px 10px; font-size: 12px; white-space: nowrap; }
   .pill-warn { background: var(--gold-wash); color: var(--gold-deep); border-radius: 999px; padding: 2px 10px; font-size: 12px; white-space: nowrap; }
   .pill-bad { background: var(--red-wash); color: var(--red); border-radius: 999px; padding: 2px 10px; font-size: 12px; white-space: nowrap; }
@@ -187,36 +188,44 @@
 
 <script>
 /* =========================================================
-   Configuração (números do BP v3 — planilha Viabilidade v3)
+   Configuração (números do BP v4 — planilha Viabilidade v4)
    ========================================================= */
 const MESES = ['2027-03','2027-04','2027-05','2027-06','2027-07','2027-08','2027-09','2027-10','2027-11','2027-12','2028-01','2028-02'];
 const NOME_MES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 const CANAIS = {
   loja:    { nome: 'Loja online', curto: 'Loja', cor: 'var(--c-loja)', margem: 0.361 },
   b2b:     { nome: 'Kits corporativos', curto: 'B2B', cor: 'var(--c-b2b)', margem: 0.378 },
-  clube:   { nome: 'Clube Ritual do Mês', curto: 'Clube', cor: 'var(--c-clube)', margem: 0.333 },
+  clube:   { nome: 'Clubes de caixa (Ritual + VF)', curto: 'Caixas', cor: 'var(--c-clube)', margem: 0.291 },
+  circulo: { nome: 'Círculo (vantagens)', curto: 'Círculo', cor: 'var(--c-circulo)', margem: 0.317 },
   revenda: { nome: 'Revenda', curto: 'Revenda', cor: 'var(--c-revenda)', margem: 0.312 }
 };
-// metas de receita líquida por mês e canal (cenário base do BP v3)
+// metas de receita líquida por mês e canal (cenário base do BP v4); clube = Ritual do Mês + VF trimestral
 const METAS = {
-  '2027-03': { loja: 0,     b2b: 0,     clube: 0,     revenda: 0 },
-  '2027-04': { loja: 0,     b2b: 0,     clube: 0,     revenda: 0 },
-  '2027-05': { loja: 13410, b2b: 6400,  clube: 0,     revenda: 0 },
-  '2027-06': { loja: 8940,  b2b: 1600,  clube: 0,     revenda: 0 },
-  '2027-07': { loja: 8357,  b2b: 1600,  clube: 1635,  revenda: 0 },
-  '2027-08': { loja: 10884, b2b: 3200,  clube: 3161,  revenda: 650 },
-  '2027-09': { loja: 15548, b2b: 3200,  clube: 5014,  revenda: 1300 },
-  '2027-10': { loja: 19824, b2b: 4800,  clube: 6649,  revenda: 1950 },
-  '2027-11': { loja: 25654, b2b: 12800, clube: 8720,  revenda: 2600 },
-  '2027-12': { loja: 31096, b2b: 19200, clube: 11118, revenda: 3250 },
-  '2028-01': { loja: 26043, b2b: 4800,  clube: 12208, revenda: 1950 },
-  '2028-02': { loja: 25460, b2b: 3200,  clube: 13189, revenda: 1950 }
+  '2027-03': { loja: 0,     b2b: 0,     clube: 0,     circulo: 0,    revenda: 0 },
+  '2027-04': { loja: 0,     b2b: 0,     clube: 0,     circulo: 0,    revenda: 0 },
+  '2027-05': { loja: 13410, b2b: 6400,  clube: 0,     circulo: 0,    revenda: 0 },
+  '2027-06': { loja: 8940,  b2b: 1600,  clube: 0,     circulo: 299,  revenda: 0 },
+  '2027-07': { loja: 8357,  b2b: 1600,  clube: 1689,  circulo: 577,  revenda: 0 },
+  '2027-08': { loja: 10884, b2b: 3200,  clube: 3265,  circulo: 836,  revenda: 650 },
+  '2027-09': { loja: 15548, b2b: 3200,  clube: 5180,  circulo: 1174, revenda: 1300 },
+  '2027-10': { loja: 19824, b2b: 4800,  clube: 7699,  circulo: 1572, revenda: 1950 },
+  '2027-11': { loja: 25654, b2b: 12800, clube: 11000, circulo: 2249, revenda: 2600 },
+  '2027-12': { loja: 31096, b2b: 19200, clube: 15054, circulo: 2667, revenda: 3250 },
+  '2028-01': { loja: 26043, b2b: 4800,  clube: 16429, circulo: 2846, revenda: 1950 },
+  '2028-02': { loja: 25460, b2b: 3200,  clube: 17692, circulo: 2925, revenda: 1950 }
 };
 const CFG = {
-  fixosOperacionais: 500, midia: 1500, proLabore: 3000, inicioProLabore: '2027-06',
+  fixosOperacionais: 550, midia: 1500, proLabore: 3000, inicioProLabore: '2027-06',
   comissaoParceira: 0.10, custoKitParceira: 140, vendasPagamKit: 3,
-  mensalidadeClube: 109, limiteCanal: 0.60, caixaMinProLabore: 5000
+  limiteCanal: 0.60, caixaMinProLabore: 5000
 };
+// planos de clube (BP v4)
+const PLANOS = {
+  circulo: { nome: 'Círculo Vanilla Flor', curto: 'Círculo', canal: 'circulo', preco: 19.90, unidade: 'membros', inicio: '2027-06', meta: 147, churn: 0.08, desc: 'Só vantagens, sem caixa: 10% de desconto, frete grátis a partir de R$ 149, acesso antecipado, exclusivos e comunidade.' },
+  ritual:  { nome: 'Ritual do Mês', curto: 'Ritual', canal: 'clube', preco: 112.60, unidade: 'assinantes', inicio: '2027-07', meta: 121, churn: 0.10, desc: 'Caixa surpresa mensal + todas as vantagens. R$ 119 mensal, R$ 107 no anual, R$ 109 na Turma Fundadora (média R$ 112,60).' },
+  vf:      { nome: 'VF Minimalista trimestral', curto: 'VF trimestral', canal: 'clube', preco: 249, unidade: 'assinantes', inicio: '2027-10', meta: 49, churn: 0.15, desc: 'Uma caixa por estação (R$ 249) + vantagens. Lance o fechamento no mês do envio da caixa.' }
+};
+const planoDe = c => c.plano || 'ritual'; // registros antigos eram do Ritual
 const ETAPAS = [
   { id: 'contato',  nome: 'Primeiro contato' },
   { id: 'amostra',  nome: 'Amostra enviada' },
@@ -253,7 +262,7 @@ const NICHOS = {
 /* =========================================================
    Armazenamento (real × demonstração, nunca misturados)
    ========================================================= */
-const K = { real: 'vf_sistema_v1', demo: 'vf_sistema_demo_v2', leads: 'vf_leads_v1', modo: 'vf_modo_v1' };
+const K = { real: 'vf_sistema_v1', demo: 'vf_sistema_demo_v4', leads: 'vf_leads_v1', modo: 'vf_modo_v1' };
 const vazio = () => ({ vendas: [], empresas: [], parceiras: [], revendedoras: [], clube: [], leads: [], leadsStatus: {} });
 const ls = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (_) { return d; } },
@@ -299,13 +308,14 @@ function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.ad
    ========================================================= */
 function vendasDoMes(m) { return db.vendas.filter(v => mesDe(v.data) === m); }
 function receitaPorCanal(m) {
-  const r = { loja: 0, b2b: 0, clube: 0, revenda: 0 };
+  const r = Object.fromEntries(Object.keys(CANAIS).map(c => [c, 0]));
   (m === 'ano' ? db.vendas : vendasDoMes(m)).forEach(v => { r[v.canal] = (r[v.canal] || 0) + (+v.valor || 0); });
   return r;
 }
 function metaDe(m) {
-  if (m === 'ano') { const t = { loja: 0, b2b: 0, clube: 0, revenda: 0 }; MESES.forEach(x => Object.keys(t).forEach(c => t[c] += METAS[x][c])); return t; }
-  return METAS[m] || { loja: 0, b2b: 0, clube: 0, revenda: 0 };
+  const zero = () => Object.fromEntries(Object.keys(CANAIS).map(c => [c, 0]));
+  if (m === 'ano') { const t = zero(); MESES.forEach(x => Object.keys(t).forEach(c => t[c] += METAS[x][c] || 0)); return t; }
+  return METAS[m] || zero();
 }
 const soma = o => Object.values(o).reduce((a, b) => a + b, 0);
 function margemDe(rec) { let t = 0; Object.keys(rec).forEach(c => t += rec[c] * CANAIS[c].margem); return t; }
@@ -345,7 +355,7 @@ const PAGINAS = [
   { id: 'parceiras', nome: 'Parceiras' }, { id: 'revenda', nome: 'Revenda' }, { id: 'clube', nome: 'Clube' },
   { id: 'leads', nome: 'Lista VIP' }, { id: 'ajustes', nome: 'Metas e ajustes' }
 ];
-let pagina = 'painel', mesSel = null, filtroCanal = 'todos', filtroInteresse = 'todos', filtroTipo = 'todos', mostrarPerdidas = false;
+let pagina = 'painel', mesSel = null, filtroCanal = 'todos', filtroInteresse = 'todos', filtroTipo = 'todos', filtroPlano = 'todos', mostrarPerdidas = false;
 
 function renderMenu() {
   const nLeads = leadsAtuais().length;
@@ -553,23 +563,31 @@ function pgRevenda() {
 }
 
 function pgClube() {
-  const regs = db.clube.slice().sort((a, b) => a.mes.localeCompare(b.mes));
-  const ult = regs[regs.length - 1];
+  const todos = db.clube.slice().sort((a, b) => a.mes.localeCompare(b.mes));
+  const regs = filtroPlano === 'todos' ? todos : todos.filter(r => planoDe(r) === filtroPlano);
+  const cards = Object.keys(PLANOS).map(k => {
+    const pl = PLANOS[k], rs = todos.filter(r => planoDe(r) === k), ult = rs[rs.length - 1];
+    const churn = ult && ult.anteriores ? ult.cancelados / ult.anteriores : null;
+    return `<div class="card kpi"><div class="label">${pl.nome}</div><div class="value">${ult ? nInt(+ult.ativos) : 0}</div>
+      <div class="sub">${pl.unidade} ${ult ? 'em ' + mesLabel(ult.mes) : '· abre em ' + mesLabel(pl.inicio)} · meta ${pl.meta} em fev/28</div>
+      <div class="sub">receita ${brl(ult ? +ult.valor || ult.ativos * pl.preco : 0)}${k === 'vf' ? ' por trimestre' : '/mês'} · cancelamento ${churn === null ? '–' : (churn > pl.churn ? `<span class="neg">${pct(churn)}</span>` : pct(churn))}</div>
+      <div class="bar"><i style="width:${Math.min(100, (ult ? ult.ativos : 0) / pl.meta * 100)}%"></i></div></div>`;
+  }).join('');
   return `
-  <div class="page-head"><div><h1>Clube Ritual do Mês</h1><p>Assinantes mês a mês. R$ ${CFG.mensalidadeClube} por mês, frete incluso. Abre em julho de 2027.</p></div>
-    <div class="head-actions"><button class="btn primary" data-act="novo-clube">+ Fechar mês do clube</button></div></div>
-  <div class="grid kpis">
-    <div class="card kpi"><div class="label">Assinantes ativos</div><div class="value">${ult ? nInt(+ult.ativos) : 0}</div><div class="sub">${ult ? mesLabel(ult.mes) : 'nenhum mês fechado'}</div></div>
-    <div class="card kpi"><div class="label">Receita recorrente</div><div class="value">${brl(ult ? ult.ativos * CFG.mensalidadeClube : 0)}</div><div class="sub">por mês</div></div>
-    <div class="card kpi"><div class="label">Cancelamento</div><div class="value">${ult && ult.anteriores ? pct(ult.cancelados / ult.anteriores) : '–'}</div><div class="sub">meta: até 10% ao mês</div></div>
-    <div class="card kpi"><div class="label">Meta de fev/28</div><div class="value">121</div><div class="sub">assinantes (BP v3)</div></div>
-  </div>
+  <div class="page-head"><div><h1>Clubes</h1><p>Dois planos que convivem: o Círculo (só vantagens) e as caixas (Ritual do Mês e VF Minimalista trimestral, que incluem as vantagens).</p></div>
+    <div class="head-actions"><select class="pill" data-act="filtro-plano"><option value="todos">Todos os planos</option>${Object.keys(PLANOS).map(k => `<option value="${k}" ${filtroPlano === k ? 'selected' : ''}>${PLANOS[k].nome}</option>`).join('')}</select>
+      <button class="btn primary" data-act="novo-clube">+ Fechar mês</button></div></div>
+  <div class="grid three">${cards}</div>
   <div class="card section-gap"><div class="table-wrap"><table>
-    <thead><tr><th>Mês</th><th class="num">Novos</th><th class="num">Cancelados</th><th class="num">Ativos</th><th class="num">Cancelamento</th><th class="num">Mensalidades</th><th></th></tr></thead>
-    <tbody>${regs.length ? regs.map(r => `<tr><td>${mesLabel(r.mes)}</td><td class="num">${nInt(+r.novos)}</td><td class="num">${nInt(+r.cancelados)}</td><td class="num"><b>${nInt(+r.ativos)}</b></td>
-      <td class="num">${r.anteriores ? (r.cancelados / r.anteriores > 0.10 ? `<span class="pill-bad">${pct(r.cancelados / r.anteriores)}</span>` : pct(r.cancelados / r.anteriores)) : '–'}</td>
-      <td class="num">${brl(r.ativos * CFG.mensalidadeClube)}</td><td class="num"><button class="icon-btn" data-act="excluir-clube" data-id="${r.id}">✕</button></td></tr>`).join('') : '<tr><td colspan="7" class="empty">Nenhum mês fechado.</td></tr>'}</tbody>
-  </table></div><p class="note">Ao fechar o mês, o sistema calcula os ativos (anteriores + novos − cancelados) e lança automaticamente as mensalidades como venda do canal Clube.</p></div>`;
+    <thead><tr><th>Mês</th><th>Plano</th><th class="num">Novos</th><th class="num">Cancelados</th><th class="num">Ativos</th><th class="num">Cancelamento</th><th class="num">Receita</th><th></th></tr></thead>
+    <tbody>${regs.length ? regs.map(r => { const pl = PLANOS[planoDe(r)]; const ch = r.anteriores ? r.cancelados / r.anteriores : null; return `<tr><td>${mesLabel(r.mes)}</td>
+      <td><span class="tag ${pl.canal === 'circulo' ? 't-circulo' : 't-clube'}">${pl.curto}</span></td>
+      <td class="num">${nInt(+r.novos)}</td><td class="num">${nInt(+r.cancelados)}</td><td class="num"><b>${nInt(+r.ativos)}</b></td>
+      <td class="num">${ch === null ? '–' : (ch > pl.churn ? `<span class="pill-bad">${pct(ch)}</span>` : pct(ch))}</td>
+      <td class="num">${brl(+r.valor || r.ativos * pl.preco)}</td><td class="num"><button class="icon-btn" data-act="excluir-clube" data-id="${r.id}">✕</button></td></tr>`; }).join('') : '<tr><td colspan="8" class="empty">Nenhum mês fechado.</td></tr>'}</tbody>
+  </table></div>
+  <div class="grid three section-gap">${Object.keys(PLANOS).map(k => `<div><b>${PLANOS[k].nome}</b><p class="note" style="margin-top:4px">${PLANOS[k].desc} Cancelamento aceitável: até ${pct(PLANOS[k].churn)}${k === 'vf' ? ' por trimestre' : ' ao mês'}.</p></div>`).join('')}</div>
+  <p class="note">Ao fechar o mês, o sistema calcula os ativos (anteriores + novos − cancelados) e lança a receita como venda: Círculo no canal Círculo; Ritual e VF no canal Clubes de caixa.</p></div>`;
 }
 
 function pgLeads() {
@@ -590,8 +608,8 @@ function pgLeads() {
 
 function pgAjustes() {
   return `
-  <div class="page-head"><div><h1>Metas e ajustes</h1><p>Metas mensais do BP v3 (cenário base) e configurações do sistema.</p></div></div>
-  <div class="card"><h2>Metas de receita líquida por canal <small>fonte: Viabilidade_Vanilla_Flor_2027_v3.xlsx</small></h2><div class="table-wrap"><table>
+  <div class="page-head"><div><h1>Metas e ajustes</h1><p>Metas mensais do BP v4 (cenário base) e configurações do sistema.</p></div></div>
+  <div class="card"><h2>Metas de receita líquida por canal <small>fonte: Viabilidade_Vanilla_Flor_2027_v4.xlsx</small></h2><div class="table-wrap"><table>
     <thead><tr><th>Mês</th>${Object.keys(CANAIS).map(c => `<th class="num">${CANAIS[c].curto}</th>`).join('')}<th class="num">Total</th></tr></thead>
     <tbody>${MESES.map(m => `<tr><td>${mesLabel(m)}</td>${Object.keys(CANAIS).map(c => `<td class="num">${brl(METAS[m][c])}</td>`).join('')}<td class="num"><b>${brl(soma(METAS[m]))}</b></td></tr>`).join('')}</tbody>
     <tfoot><tr><td>Total</td>${Object.keys(CANAIS).map(c => `<td class="num">${brl(MESES.reduce((a, m) => a + METAS[m][c], 0))}</td>`).join('')}<td class="num">${brl(MESES.reduce((a, m) => a + soma(METAS[m]), 0))}</td></tr></tfoot>
@@ -599,7 +617,7 @@ function pgAjustes() {
   <div class="grid three section-gap">
     <div class="card"><h2>Premissas</h2><table><tbody>
       <tr><td>Margem da loja</td><td class="num">${pct(CANAIS.loja.margem)}</td></tr><tr><td>Margem do B2B</td><td class="num">${pct(CANAIS.b2b.margem)}</td></tr>
-      <tr><td>Margem do clube</td><td class="num">${pct(CANAIS.clube.margem)}</td></tr><tr><td>Margem da revenda</td><td class="num">${pct(CANAIS.revenda.margem)}</td></tr>
+      <tr><td>Margem das caixas (Ritual + VF)</td><td class="num">${pct(CANAIS.clube.margem)}</td></tr><tr><td>Margem do Círculo</td><td class="num">${pct(CANAIS.circulo.margem)}</td></tr><tr><td>Margem da revenda</td><td class="num">${pct(CANAIS.revenda.margem)}</td></tr>
       <tr><td>Fixos operacionais</td><td class="num">${brl(CFG.fixosOperacionais)}</td></tr><tr><td>Mídia paga</td><td class="num">${brl(CFG.midia)}</td></tr>
       <tr><td>Pró-labore (desde jun/27)</td><td class="num">${brl(CFG.proLabore)}</td></tr></tbody></table></div>
     <div class="card"><h2>Modo</h2><p>${modo === 'demo' ? 'Você está vendo <b>dados de demonstração</b>.' : 'Você está usando <b>dados reais</b>.'}</p>
@@ -731,22 +749,38 @@ function formRevendedora(r = {}) {
   });
 }
 function formClube() {
-  const regs = db.clube.slice().sort((a, b) => a.mes.localeCompare(b.mes));
-  const ult = regs[regs.length - 1];
-  const prox = ult ? MESES[Math.min(MESES.length - 1, MESES.indexOf(ult.mes) + 1)] : '2027-07';
+  const sugestao = plano => {
+    const rs = db.clube.filter(r => planoDe(r) === plano).sort((a, b) => a.mes.localeCompare(b.mes));
+    const ult = rs[rs.length - 1];
+    const passo = plano === 'vf' ? 3 : 1;
+    const mes = ult ? MESES[Math.min(MESES.length - 1, MESES.indexOf(ult.mes) + passo)] : PLANOS[plano].inicio;
+    return { mes, anteriores: ult ? ult.ativos : 0, preco: PLANOS[plano].preco };
+  };
+  const plano0 = filtroPlano !== 'todos' ? filtroPlano : 'ritual', s0 = sugestao(plano0);
   abrirForm('Fechar mês do clube', [
-    { name: 'mes', label: 'Mês', type: 'select', options: MESES.map(m => ({ value: m, label: mesLabel(m) })), value: prox },
-    { name: 'anteriores', label: 'Ativos no início do mês', type: 'number', min: 0, value: ult ? ult.ativos : 0 },
-    { name: 'novos', label: 'Novas assinantes', type: 'number', min: 0, value: 0 },
-    { name: 'cancelados', label: 'Cancelamentos', type: 'number', min: 0, value: 0 }
+    { name: 'plano', label: 'Plano', type: 'select', full: true, options: Object.keys(PLANOS).map(k => ({ value: k, label: PLANOS[k].nome })), value: plano0 },
+    { name: 'mes', label: 'Mês', type: 'select', options: MESES.map(m => ({ value: m, label: mesLabel(m) })), value: s0.mes },
+    { name: 'anteriores', label: 'Ativos no início do mês', type: 'number', min: 0, value: s0.anteriores },
+    { name: 'novos', label: 'Novas entradas', type: 'number', min: 0, value: 0 },
+    { name: 'cancelados', label: 'Cancelamentos', type: 'number', min: 0, value: 0 },
+    { name: 'preco', label: 'Valor médio por pessoa (R$)', type: 'number', min: 0, step: '0.01', value: s0.preco, full: true, hint: ' ' }
   ], {}, d => {
-    if (db.clube.some(c => c.mes === d.mes)) { toast('Esse mês já foi fechado'); return false; }
+    if (db.clube.some(c => c.mes === d.mes && planoDe(c) === d.plano)) { toast('Esse mês já foi fechado para este plano'); return false; }
+    const pl = PLANOS[d.plano];
     const ativos = Math.max(0, (+d.anteriores || 0) + (+d.novos || 0) - (+d.cancelados || 0));
-    const reg = { id: uid(), mes: d.mes, anteriores: +d.anteriores || 0, novos: +d.novos || 0, cancelados: +d.cancelados || 0, ativos };
-    const venda = { id: uid(), data: d.mes + '-05', canal: 'clube', descricao: `Mensalidades do clube — ${mesLabel(d.mes)}`, qtd: ativos, valor: ativos * CFG.mensalidadeClube, ref: 'clube' };
+    const valor = Math.round(ativos * (+d.preco || 0) * 100) / 100;
+    const reg = { id: uid(), plano: d.plano, mes: d.mes, anteriores: +d.anteriores || 0, novos: +d.novos || 0, cancelados: +d.cancelados || 0, ativos, valor };
+    const venda = { id: uid(), data: d.mes + '-05', canal: pl.canal, descricao: `${pl.nome} — ${mesLabel(d.mes)}`, qtd: ativos, valor, ref: pl.curto };
     reg.vendaId = venda.id; db.clube.push(reg); db.vendas.push(venda);
-    toast(`Mês fechado: ${ativos} assinantes, ${brl(venda.valor)}`);
+    toast(`${pl.curto}: ${ativos} ${pl.unidade}, ${brl(valor)}`);
   });
+  // ao trocar o plano, sugere mês, base anterior e valor desse plano
+  aoMudarModal = (form, campo) => {
+    const pl = form.elements.plano.value;
+    if (campo === 'plano') { const s = sugestao(pl); form.elements.mes.value = s.mes; form.elements.anteriores.value = s.anteriores; form.elements.preco.value = s.preco; }
+    form.querySelector('[data-field="preco"] .hint').textContent = PLANOS[pl].desc;
+  };
+  aoMudarModal($('#modalForm'), null);
 }
 
 /* =========================================================
@@ -794,6 +828,7 @@ document.addEventListener('change', e => {
   if (a.dataset.act === 'filtro-canal') { filtroCanal = a.value; render(); }
   if (a.dataset.act === 'filtro-interesse') { filtroInteresse = a.value; render(); }
   if (a.dataset.act === 'filtro-tipo') { filtroTipo = a.value; render(); }
+  if (a.dataset.act === 'filtro-plano') { filtroPlano = a.value; render(); }
 });
 $('#openSide').addEventListener('click', () => $('#side').classList.toggle('open'));
 // se a lista VIP mudar em outra aba (página institucional), atualiza
@@ -863,11 +898,12 @@ function gerarDemo() {
     d.empresas.push(x);
   });
   d.empresas.push({ id: 'e9', empresa: 'Imobiliária Exemplo', contato: 'Rafael', ocasiao: 'Fim de ano', kits: 30, valorKit: 280, etapa: 'perdido', prazo: '', obs: 'Orçamento de brindes já fechado com outro fornecedor' });
-  // clube
-  [['2027-07', 0, 16, 0], ['2027-08', 16, 15, 2]].forEach(([mes, anteriores, novos, cancelados]) => {
-    const ativos = anteriores + novos - cancelados;
-    const v = { id: uid(), data: mes + '-05', canal: 'clube', descricao: `Mensalidades do clube — ${mesLabel(mes)}`, qtd: ativos, valor: ativos * CFG.mensalidadeClube, ref: 'clube' };
-    d.vendas.push(v); d.clube.push({ id: uid(), mes, anteriores, novos, cancelados, ativos, vendaId: v.id });
+  // clubes: Círculo desde junho, Ritual do Mês desde julho
+  [['circulo', '2027-06', 0, 17, 0], ['circulo', '2027-07', 17, 15, 1], ['circulo', '2027-08', 31, 14, 2],
+   ['ritual', '2027-07', 0, 16, 0], ['ritual', '2027-08', 16, 15, 1]].forEach(([plano, mes, anteriores, novos, cancelados]) => {
+    const pl = PLANOS[plano], ativos = anteriores + novos - cancelados, valor = Math.round(ativos * pl.preco * 100) / 100;
+    const v = { id: uid(), data: mes + '-05', canal: pl.canal, descricao: `${pl.nome} — ${mesLabel(mes)}`, qtd: ativos, valor, ref: pl.curto };
+    d.vendas.push(v); d.clube.push({ id: uid(), plano, mes, anteriores, novos, cancelados, ativos, valor, vendaId: v.id });
   });
   // revenda
   d.revendedoras.push({ id: 'r0', nome: 'Papelaria Encanto (exemplo)', tipo: 'Papelaria boutique', cidade: 'Niterói', contato: '(21) 90000-0000' });
