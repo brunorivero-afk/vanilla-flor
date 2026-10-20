@@ -134,7 +134,7 @@
   /* modal */
   .modal-bg { position: fixed; inset: 0; background: rgba(43,37,34,.38); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 100; }
   .modal-bg.open { display: flex; }
-  .modal { background: var(--card); border-radius: 22px; width: min(560px, 100%); max-height: 92vh; overflow: auto; padding: 26px 26px 22px; box-shadow: 0 30px 80px -30px rgba(0,0,0,.45); }
+  .modal { background: var(--card); border-radius: 22px; width: min(560px, 100%); max-height: 92vh; overflow-y: auto; overflow-x: hidden; padding: 26px 26px 22px; box-shadow: 0 30px 80px -30px rgba(0,0,0,.45); }
   .modal h3 { font-family: var(--serif); font-weight: 600; font-size: 26px; margin-bottom: 16px; }
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
   .form-grid .full { grid-column: 1 / -1; }
@@ -227,6 +227,28 @@ const ETAPAS = [
 const INTERESSES = { vanilla: 'Linha Vanilla Flor', minimalista: 'VF Minimalista', empresa: 'Kits para empresa', parceira: 'Ser influenciadora', consultora: 'Ser consultora', revenda: 'Revender', clube: 'Clube de assinatura' };
 const TIPOS_PARCEIRA = { influenciadora: 'Influenciadora', consultora: 'Consultora' };
 const tipoDe = p => p.tipo || 'influenciadora'; // registros antigos eram todos influenciadoras
+// nicho: para influenciadora é o assunto do perfil; para consultora, quem ela é
+const NICHOS = {
+  influenciadora: {
+    rotulo: 'Assunto do perfil',
+    itens: {
+      'Studygram': 'Perfis de estudo bonito no Instagram: cadernos, canetas coloridas e mesa de estudo arrumada. Muita universitária e adolescente.',
+      'Bullet journal': 'Quem monta o próprio planner à mão, desenhando calendários e listas num caderno pontilhado. Compra muita caneta, washi tape e caderno.',
+      'Concursos': 'Quem estuda para concurso público e mostra rotina, cronograma e resumos. Público do Kit Ritual de Estudos.',
+      'Organização e rotina': 'Perfis de vida organizada: planejamento da semana, casa e autocuidado. Mais amplo, menos focado em estudo.',
+      'Papelaria': 'Perfis que mostram e testam produtos de papelaria (as "papelólatras").',
+      'Produtividade / carreira': 'Perfis de trabalho, gestão do tempo e empreendedorismo. Público da linha VF Minimalista.'
+    }
+  },
+  consultora: {
+    rotulo: 'Quem ela é',
+    itens: {
+      'Professora': 'Vende para colegas da escola: planners de aula, agendas e cadernos.',
+      'Estudante': 'Vende para colegas da faculdade ou do cursinho.',
+      'Empreendedora': 'Tem rede própria: grupo de clientes, amigas ou um pequeno negócio.'
+    }
+  }
+};
 
 /* =========================================================
    Armazenamento (real × demonstração, nunca misturados)
@@ -616,8 +638,9 @@ function atualizarVisibilidade() {
     el.style.display = valor.split('|').includes(atual) ? '' : 'none';
   });
 }
-function fecharModal() { $('#modalBg').classList.remove('open'); onSalvarModal = null; }
-$('#modalForm').addEventListener('change', atualizarVisibilidade);
+function fecharModal() { $('#modalBg').classList.remove('open'); onSalvarModal = null; aoMudarModal = null; }
+let aoMudarModal = null;
+$('#modalForm').addEventListener('change', e => { if (aoMudarModal) aoMudarModal($('#modalForm'), e.target.name); atualizarVisibilidade(); });
 $('#modalForm').addEventListener('submit', e => {
   e.preventDefault();
   const dados = Object.fromEntries(new FormData(e.target).entries());
@@ -667,7 +690,7 @@ function formParceira(p = {}) {
   abrirForm(p.id ? 'Editar parceira' : 'Nova parceira', [
     { name: 'tipo', label: 'Tipo', type: 'select', full: true, options: Object.keys(TIPOS_PARCEIRA).map(t => ({ value: t, label: TIPOS_PARCEIRA[t] })), value: tipoDe(p) },
     { name: 'nome', label: 'Nome', required: true }, { name: 'instagram', label: 'Instagram / TikTok / WhatsApp', placeholder: '@perfil ou telefone' },
-    { name: 'nicho', label: 'Perfil', type: 'select', options: ['Studygram', 'Bullet journal', 'Concursos', 'Organização e rotina', 'Papelaria', 'Produtividade / carreira', 'Professora', 'Estudante', 'Empreendedora'].map(o => ({ value: o, label: o })) },
+    { name: 'nicho', label: NICHOS[tipoDe(p)].rotulo, type: 'select', full: true, options: Object.keys(NICHOS[tipoDe(p)].itens).map(o => ({ value: o, label: o })), hint: ' ' },
     { name: 'seguidores', label: 'Seguidores', type: 'number', min: 0, showIf: 'tipo=influenciadora' },
     { name: 'cupom', label: 'Cupom', required: true, placeholder: 'EX.: ANA10' }, { name: 'comissao', label: 'Comissão (%)', type: 'number', min: 0, step: '0.5', value: 10 },
     { name: 'kitEnviadoEm', label: 'Kit enviado em', type: 'date', showIf: 'tipo=influenciadora' },
@@ -681,6 +704,20 @@ function formParceira(p = {}) {
     if (p.id) db.parceiras[db.parceiras.findIndex(x => x.id === p.id)] = reg; else db.parceiras.push(reg);
     toast('Parceira salva');
   });
+  // nicho acompanha o tipo e explica a opção escolhida
+  aoMudarModal = (form, campo) => {
+    const grupo = NICHOS[form.elements.tipo.value] || NICHOS.influenciadora;
+    const sel = form.elements.nicho, caixa = form.querySelector('[data-field="nicho"]');
+    if (campo === 'tipo' || campo === null) {
+      const atual = sel.value, opcoes = Object.keys(grupo.itens);
+      if (atual && !opcoes.includes(atual) && campo === null) opcoes.unshift(atual); // valor antigo fora da lista
+      sel.innerHTML = opcoes.map(o => `<option value="${esc(o)}">${esc(o)}</option>`).join('');
+      sel.value = opcoes.includes(atual) ? atual : opcoes[0];
+      caixa.querySelector('label').textContent = grupo.rotulo;
+    }
+    caixa.querySelector('.hint').textContent = grupo.itens[sel.value] || '';
+  };
+  aoMudarModal($('#modalForm'), null);
 }
 function formRevendedora(r = {}) {
   abrirForm(r.id ? 'Editar revendedora' : 'Nova revendedora', [
