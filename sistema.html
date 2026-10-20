@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vanilla Flor — Sistema de Vendas</title>
+<link rel="icon" href="assets/icon-64.png">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@300;400;500;600&family=Pinyon+Script&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f6f1e7; --side: #efe7d8; --card: #fffdf8; --line: #e6dccb; --line-2: #efe7d9;
+    --ink: #3f332c; --ink-soft: #7a6a60; --muted: #a39385;
+    --gold: #b08d57; --gold-deep: #8f6e3e; --gold-light: #d8bf8f; --gold-wash: #f5ecdc;
+    --rose: #c98f93; --rose-wash: #f6e4e3; --sage: #8fa588; --sage-wash: #e6ede2;
+    --lilac: #a996c4; --lilac-wash: #ece6f4; --sky: #8fb1cf; --sky-wash: #e4edf5;
+    --onyx: #2b2522; --red: #b5534d; --red-wash: #f7e2df;
+    --c-loja: #c98f93; --c-b2b: #3d3430; --c-clube: #8fa588; --c-revenda: #b08d57;
+    --serif: 'Cormorant Garamond', Georgia, serif; --sans: 'Jost', 'Helvetica Neue', Arial, sans-serif; --script: 'Pinyon Script', cursive;
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--sans); font-size: 14.5px; color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  .app { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+
+  /* sidebar */
+  aside { background: var(--side); border-right: 1px solid var(--line); padding: 26px 16px; position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; }
+  .logo { font-family: var(--script); font-size: 34px; color: var(--gold-deep); padding: 0 12px; line-height: 1; }
+  .logo-sub { font-size: 10.5px; letter-spacing: .26em; text-transform: uppercase; color: var(--rose); padding: 6px 12px 26px; }
+  nav.menu { display: grid; gap: 2px; }
+  nav.menu button { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: none; border: 0; padding: 11px 12px; border-radius: 12px; cursor: pointer; color: var(--ink-soft); font-size: 14.5px; transition: background .15s, color .15s; }
+  nav.menu button svg { width: 18px; height: 18px; flex: none; }
+  nav.menu button:hover { background: rgba(255,253,248,.6); color: var(--ink); }
+  nav.menu button.active { background: var(--card); color: var(--gold-deep); box-shadow: 0 1px 0 var(--line); font-weight: 500; }
+  nav.menu .count { margin-left: auto; font-size: 11.5px; background: var(--gold-wash); color: var(--gold-deep); border-radius: 999px; padding: 1px 8px; }
+  .side-foot { margin-top: auto; padding: 14px 12px 0; font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); }
+  .side-foot a { color: var(--gold-deep); }
+
+  /* main */
+  main { padding: 28px 34px 60px; min-width: 0; }
+  .demo-bar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; background: var(--lilac-wash); border: 1px solid #ddd2ec; color: #5e4f78; border-radius: 14px; padding: 10px 16px; margin-bottom: 22px; font-size: 13.5px; }
+  .demo-bar b { font-weight: 600; }
+  .demo-bar button { margin-left: auto; }
+  .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+  .page-head h1 { font-family: var(--serif); font-weight: 600; font-size: 36px; line-height: 1.05; }
+  .page-head p { color: var(--ink-soft); margin-top: 4px; }
+  .head-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+  .btn { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; padding: 9px 18px; border: 1px solid var(--line); background: var(--card); cursor: pointer; font-size: 13.5px; transition: all .15s; white-space: nowrap; }
+  .btn:hover { border-color: var(--gold-light); }
+  .btn.primary { background: linear-gradient(135deg, var(--gold-light), var(--gold) 60%, var(--gold-deep)); color: #fff; border-color: transparent; }
+  .btn.primary:hover { filter: brightness(1.05); }
+  .btn.small { padding: 5px 12px; font-size: 12.5px; }
+  .btn.ghost { background: transparent; }
+  .btn.danger { color: var(--red); }
+  .icon-btn { background: none; border: 0; cursor: pointer; color: var(--muted); padding: 4px 6px; border-radius: 8px; }
+  .icon-btn:hover { color: var(--ink); background: var(--gold-wash); }
+  select.pill, input.pill { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 8px 14px; outline: none; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; min-width: 0; }
+  .card h2 { font-family: var(--serif); font-weight: 600; font-size: 22px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .card h2 small { font-family: var(--sans); font-size: 12px; font-weight: 400; color: var(--muted); }
+  .grid { display: grid; gap: 16px; }
+  .kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .two { grid-template-columns: 1.5fr 1fr; }
+  .three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .kpi .label { font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  .kpi .value { font-family: var(--serif); font-size: 34px; font-weight: 600; line-height: 1.1; margin-top: 6px; }
+  .kpi .sub { font-size: 13px; color: var(--ink-soft); margin-top: 4px; }
+  .kpi .sub b { font-weight: 500; }
+  .bar { height: 6px; background: var(--line-2); border-radius: 999px; overflow: hidden; margin-top: 12px; }
+  .bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--gold-light), var(--gold)); border-radius: 999px; }
+  .pos { color: #4f7a49; } .neg { color: var(--red); }
+
+  /* tabela */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 500; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  td { padding: 10px; border-bottom: 1px solid var(--line-2); vertical-align: middle; }
+  tr:last-child td { border-bottom: 0; }
+  td.num, th.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  tfoot td { font-weight: 600; border-top: 1px solid var(--line); }
+  .empty { text-align: center; color: var(--muted); padding: 30px 10px; }
+
+  .tag { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; border-radius: 999px; padding: 2px 10px; white-space: nowrap; }
+  .tag::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: .85; }
+  .t-loja { background: var(--rose-wash); color: #a5666b; }
+  .t-b2b { background: #ece7e3; color: #3d3430; }
+  .t-clube { background: var(--sage-wash); color: #5f7a59; }
+  .t-revenda { background: var(--gold-wash); color: var(--gold-deep); }
+  .pill-ok { background: var(--sage-wash); color: #4f7a49; border-radius: 999px; padding: 2px 10px; font-size: 12px; white-space: nowrap; }
+  .pill-warn { background: var(--gold-wash); color: var(--gold-deep); border-radius: 999px; padding: 2px 10px; font-size: 12px; white-space: nowrap; }
+  .pill-bad { background: var(--red-wash); color: var(--red); border-radius: 999px; padding: 2px 10px; font-size: 12px; white-space: nowrap; }
+  .chip { display: inline-block; font-size: 11.5px; border: 1px solid var(--line); border-radius: 999px; padding: 1px 9px; margin: 1px 2px 1px 0; color: var(--ink-soft); background: var(--bg); }
+
+  /* gráfico mensal */
+  .chart { display: grid; grid-template-columns: repeat(12, 1fr); gap: 8px; align-items: end; height: 210px; padding-top: 10px; }
+  .chart .col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; position: relative; cursor: pointer; }
+  .chart .stack { width: 70%; max-width: 34px; display: flex; flex-direction: column-reverse; border-radius: 6px 6px 2px 2px; overflow: hidden; background: transparent; position: relative; }
+  .chart .stack i { display: block; width: 100%; }
+  .chart .meta { position: absolute; left: 8%; right: 8%; border-top: 2px dashed var(--gold); }
+  .chart .lbl { font-size: 11px; color: var(--muted); margin-top: 6px; white-space: nowrap; }
+  .chart .col.sel .lbl { color: var(--gold-deep); font-weight: 600; }
+  .chart .col:hover .stack { filter: brightness(1.05); }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-soft); margin-top: 14px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+  .legend .dash { width: 16px; height: 0; border-top: 2px dashed var(--gold); border-radius: 0; }
+
+  .alerts { display: grid; gap: 8px; }
+  .alert { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; padding: 10px 12px; border-radius: 12px; background: var(--bg); border: 1px solid var(--line-2); }
+  .alert b { font-weight: 600; }
+  .alert.warn { background: var(--gold-wash); border-color: #ecdcbf; }
+  .alert.bad { background: var(--red-wash); border-color: #efcdc9; }
+  .alert.ok { background: var(--sage-wash); border-color: #d3e0cd; }
+
+  /* kanban */
+  .kanban { display: grid; grid-template-columns: repeat(5, minmax(210px, 1fr)); gap: 14px; overflow-x: auto; padding-bottom: 6px; }
+  .kcol { background: rgba(255,253,248,.55); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; min-height: 240px; }
+  .kcol h3 { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); font-weight: 500; display: flex; justify-content: space-between; margin: 2px 4px 10px; }
+  .kcol h3 span { color: var(--muted); }
+  .kcol .ktotal { font-size: 12px; color: var(--muted); margin: -6px 4px 10px; }
+  .kcard { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px; margin-bottom: 10px; }
+  .kcard b { font-weight: 600; display: block; }
+  .kcard .meta-l { font-size: 12.5px; color: var(--ink-soft); margin-top: 2px; }
+  .kcard .val { font-family: var(--serif); font-size: 20px; font-weight: 600; margin-top: 6px; }
+  .kcard .acts { display: flex; gap: 4px; margin-top: 8px; align-items: center; flex-wrap: wrap; }
+  .kcard .acts .spacer { flex: 1; }
+
+  /* modal */
+  .modal-bg { position: fixed; inset: 0; background: rgba(43,37,34,.38); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 100; }
+  .modal-bg.open { display: flex; }
+  .modal { background: var(--card); border-radius: 22px; width: min(560px, 100%); max-height: 92vh; overflow: auto; padding: 26px 26px 22px; box-shadow: 0 30px 80px -30px rgba(0,0,0,.45); }
+  .modal h3 { font-family: var(--serif); font-weight: 600; font-size: 26px; margin-bottom: 16px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+  .form-grid .full { grid-column: 1 / -1; }
+  .f { display: grid; gap: 5px; }
+  .f label { font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .f input, .f select, .f textarea { border: 1px solid var(--line); background: #fff; border-radius: 12px; padding: 10px 12px; outline: none; width: 100%; }
+  .f input:focus, .f select:focus, .f textarea:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(176,141,87,.12); }
+  .f .hint { font-size: 12px; color: var(--muted); }
+  .modal .foot { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+  .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--onyx); color: #f3eadf; padding: 11px 20px; border-radius: 999px; font-size: 13.5px; opacity: 0; transition: all .25s; z-index: 200; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translateX(-50%); }
+
+  .mobile-top { display: none; }
+  .section-gap { margin-top: 16px; }
+  .muted { color: var(--muted); }
+  .note { font-size: 12.5px; color: var(--muted); margin-top: 10px; }
+
+  @media (max-width: 1100px) {
+    .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .two, .three { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 820px) {
+    .app { grid-template-columns: 1fr; }
+    aside { position: fixed; inset: 0 auto 0 0; width: 260px; z-index: 90; transform: translateX(-100%); transition: transform .25s; box-shadow: 0 0 40px rgba(0,0,0,.2); }
+    aside.open { transform: none; }
+    .mobile-top { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: var(--side); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 80; }
+    .mobile-top .logo { font-size: 28px; padding: 0; }
+    main { padding: 20px 16px 50px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .chart .lbl { font-size: 9.5px; }
+  }
+</style>
+</head>
+<body>
+<div class="mobile-top"><div class="logo">Vanilla Flor</div><button class="btn small" id="openSide" aria-label="Abrir menu">Menu</button></div>
+<div class="app">
+  <aside id="side">
+    <div class="logo">Vanilla Flor</div>
+    <div class="logo-sub">Sistema de vendas</div>
+    <nav class="menu" id="menu"></nav>
+    <div class="side-foot"><a href="index.html">← Página institucional</a><br><span id="saveInfo">Dados salvos neste navegador</span></div>
+  </aside>
+  <main id="main"></main>
+</div>
+
+<div class="modal-bg" id="modalBg" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal"><h3 id="modalTitle"></h3><form id="modalForm"><div class="form-grid" id="modalFields"></div><div class="foot"><button type="button" class="btn ghost" id="modalCancel">Cancelar</button><button type="submit" class="btn primary">Salvar</button></div></form></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   Configuração (números do BP v3 — planilha Viabilidade v3)
+   ========================================================= */
+const MESES = ['2027-03','2027-04','2027-05','2027-06','2027-07','2027-08','2027-09','2027-10','2027-11','2027-12','2028-01','2028-02'];
+const NOME_MES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const CANAIS = {
+  loja:    { nome: 'Loja online', curto: 'Loja', cor: 'var(--c-loja)', margem: 0.361 },
+  b2b:     { nome: 'Kits corporativos', curto: 'B2B', cor: 'var(--c-b2b)', margem: 0.378 },
+  clube:   { nome: 'Clube Ritual do Mês', curto: 'Clube', cor: 'var(--c-clube)', margem: 0.333 },
+  revenda: { nome: 'Revenda', curto: 'Revenda', cor: 'var(--c-revenda)', margem: 0.312 }
+};
+// metas de receita líquida por mês e canal (cenário base do BP v3)
+const METAS = {
+  '2027-03': { loja: 0,     b2b: 0,     clube: 0,     revenda: 0 },
+  '2027-04': { loja: 0,     b2b: 0,     clube: 0,     revenda: 0 },
+  '2027-05': { loja: 13410, b2b: 6400,  clube: 0,     revenda: 0 },
+  '2027-06': { loja: 8940,  b2b: 1600,  clube: 0,     revenda: 0 },
+  '2027-07': { loja: 8357,  b2b: 1600,  clube: 1635,  revenda: 0 },
+  '2027-08': { loja: 10884, b2b: 3200,  clube: 3161,  revenda: 650 },
+  '2027-09': { loja: 15548, b2b: 3200,  clube: 5014,  revenda: 1300 },
+  '2027-10': { loja: 19824, b2b: 4800,  clube: 6649,  revenda: 1950 },
+  '2027-11': { loja: 25654, b2b: 12800, clube: 8720,  revenda: 2600 },
+  '2027-12': { loja: 31096, b2b: 19200, clube: 11118, revenda: 3250 },
+  '2028-01': { loja: 26043, b2b: 4800,  clube: 12208, revenda: 1950 },
+  '2028-02': { loja: 25460, b2b: 3200,  clube: 13189, revenda: 1950 }
+};
+const CFG = {
+  fixosOperacionais: 500, midia: 1500, proLabore: 3000, inicioProLabore: '2027-06',
+  comissaoParceira: 0.10, custoKitParceira: 140, vendasPagamKit: 3,
+  mensalidadeClube: 109, limiteCanal: 0.60, caixaMinProLabore: 5000
+};
+const ETAPAS = [
+  { id: 'contato',  nome: 'Primeiro contato' },
+  { id: 'amostra',  nome: 'Amostra enviada' },
+  { id: 'proposta', nome: 'Proposta' },
+  { id: 'fechado',  nome: 'Fechado' },
+  { id: 'entregue', nome: 'Entregue' }
+];
+const INTERESSES = { vanilla: 'Linha Vanilla Flor', minimalista: 'VF Minimalista', empresa: 'Kits para empresa', parceira: 'Ser parceira', revenda: 'Revender' };
+
+/* =========================================================
+   Armazenamento (real × demonstração, nunca misturados)
+   ========================================================= */
+const K = { real: 'vf_sistema_v1', demo: 'vf_sistema_demo_v1', leads: 'vf_leads_v1', modo: 'vf_modo_v1' };
+const vazio = () => ({ vendas: [], empresas: [], parceiras: [], revendedoras: [], clube: [], leads: [], leadsStatus: {} });
+const ls = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (_) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (_) { return false; } }
+};
+let modo = ls.get(K.modo, null);
+let db;
+function carregar() {
+  const real = ls.get(K.real, null);
+  if (!modo) modo = (real && temDados(real)) ? 'real' : 'demo';
+  if (modo === 'demo') { db = ls.get(K.demo, null) || gerarDemo(); salvar(); }
+  else { db = Object.assign(vazio(), real || {}); }
+}
+function temDados(d) { return ['vendas','empresas','parceiras','revendedoras','clube'].some(k => (d[k] || []).length); }
+function salvar() {
+  const ok = ls.set(modo === 'demo' ? K.demo : K.real, db);
+  ls.set(K.modo, modo);
+  document.getElementById('saveInfo').textContent = ok ? 'Dados salvos neste navegador' : 'Não foi possível salvar neste navegador';
+}
+// leads do site: no modo real vêm da página institucional; no demo, do exemplo
+function leadsAtuais() {
+  if (modo === 'demo') return db.leads;
+  return ls.get(K.leads, []);
+}
+
+/* =========================================================
+   Utilidades
+   ========================================================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const brl = (v, dec = 0) => (v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: dec, maximumFractionDigits: dec });
+const pct = v => isFinite(v) ? (v * 100).toLocaleString('pt-BR', { maximumFractionDigits: 0 }) + '%' : '–';
+const nInt = v => (v || 0).toLocaleString('pt-BR');
+const mesLabel = (m, ano = true) => { const [y, mm] = m.split('-'); return NOME_MES[+mm - 1] + (ano ? '/' + y.slice(2) : ''); };
+const mesDe = d => (d || '').slice(0, 7);
+const hojeISO = () => new Date().toISOString().slice(0, 10);
+const dataBR = d => d ? d.split('-').reverse().join('/') : '';
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2200); }
+
+/* =========================================================
+   Cálculos
+   ========================================================= */
+function vendasDoMes(m) { return db.vendas.filter(v => mesDe(v.data) === m); }
+function receitaPorCanal(m) {
+  const r = { loja: 0, b2b: 0, clube: 0, revenda: 0 };
+  (m === 'ano' ? db.vendas : vendasDoMes(m)).forEach(v => { r[v.canal] = (r[v.canal] || 0) + (+v.valor || 0); });
+  return r;
+}
+function metaDe(m) {
+  if (m === 'ano') { const t = { loja: 0, b2b: 0, clube: 0, revenda: 0 }; MESES.forEach(x => Object.keys(t).forEach(c => t[c] += METAS[x][c])); return t; }
+  return METAS[m] || { loja: 0, b2b: 0, clube: 0, revenda: 0 };
+}
+const soma = o => Object.values(o).reduce((a, b) => a + b, 0);
+function margemDe(rec) { let t = 0; Object.keys(rec).forEach(c => t += rec[c] * CANAIS[c].margem); return t; }
+function custosDoMes(m) {
+  const pro = m >= CFG.inicioProLabore ? CFG.proLabore : 0;
+  const kits = db.parceiras.filter(p => mesDe(p.kitEnviadoEm) === m).length * CFG.custoKitParceira;
+  return { fixos: CFG.fixosOperacionais, midia: (m >= '2027-04') ? CFG.midia : 0, proLabore: pro, kits };
+}
+function resultadoDoMes(m) {
+  const rec = receitaPorCanal(m), mg = margemDe(rec), c = custosDoMes(m);
+  return { rec, margem: mg, custos: c, resultado: mg - c.fixos - c.midia - c.proLabore - c.kits };
+}
+function vendasDaParceira(p) { return db.vendas.filter(v => v.canal === 'loja' && v.cupom && p.cupom && v.cupom.toUpperCase() === p.cupom.toUpperCase()); }
+function mesPadrao() {
+  const comDados = MESES.filter(m => vendasDoMes(m).length);
+  const atual = hojeISO().slice(0, 7);
+  if (MESES.includes(atual)) return atual;
+  if (modo === 'demo') return '2027-07'; // último mês completo do exemplo
+  return comDados.length ? comDados[comDados.length - 1] : '2027-05';
+}
+
+/* =========================================================
+   Navegação
+   ========================================================= */
+const ICON = {
+  painel: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg>',
+  vendas: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2l-2 4v14a2 2 0 002 2h12a2 2 0 002-2V6l-2-4z"/><path d="M4 6h16M16 10a4 4 0 01-8 0"/></svg>',
+  empresas: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2M10 21v-3h4v3"/></svg>',
+  parceiras: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s-7-4.4-9.3-9A5.4 5.4 0 0112 6a5.4 5.4 0 019.3 6c-2.3 4.6-9.3 9-9.3 9z"/></svg>',
+  revenda: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l1.5-5h15L21 9M3 9h18v11H3zM3 9a3 3 0 006 0 3 3 0 006 0 3 3 0 006 0"/></svg>',
+  clube: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9h18v12H3zM2 5h20v4H2zM12 5v16"/><path d="M12 5c-2-3-6-3-6 0M12 5c2-3 6-3 6 0"/></svg>',
+  leads: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l2.6 6.3L21 9l-5 4.4L17.5 20 12 16.6 6.5 20 8 13.4 3 9l6.4-.7z"/></svg>',
+  ajustes: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>'
+};
+const PAGINAS = [
+  { id: 'painel', nome: 'Painel' }, { id: 'vendas', nome: 'Vendas' }, { id: 'empresas', nome: 'Empresas (B2B)' },
+  { id: 'parceiras', nome: 'Parceiras' }, { id: 'revenda', nome: 'Revenda' }, { id: 'clube', nome: 'Clube' },
+  { id: 'leads', nome: 'Lista VIP' }, { id: 'ajustes', nome: 'Metas e ajustes' }
+];
+let pagina = 'painel', mesSel = null, filtroCanal = 'todos', filtroInteresse = 'todos', mostrarPerdidas = false;
+
+function renderMenu() {
+  const nLeads = leadsAtuais().length;
+  $('#menu').innerHTML = PAGINAS.map(p => `<button data-pg="${p.id}" class="${p.id === pagina ? 'active' : ''}">${ICON[p.id]}${p.nome}${p.id === 'leads' && nLeads ? `<span class="count">${nLeads}</span>` : ''}</button>`).join('');
+}
+function ir(p) { pagina = p; $('#side').classList.remove('open'); render(); scrollTo(0, 0); }
+function render() {
+  renderMenu();
+  const demo = modo === 'demo' ? `<div class="demo-bar"><span>✦ <b>Modo demonstração</b> — os números abaixo são fictícios, só para mostrar como o sistema funciona.</span><button class="btn small" data-act="modo-real">Começar com dados reais</button></div>` : '';
+  const html = ({ painel: pgPainel, vendas: pgVendas, empresas: pgEmpresas, parceiras: pgParceiras, revenda: pgRevenda, clube: pgClube, leads: pgLeads, ajustes: pgAjustes })[pagina]();
+  $('#main').innerHTML = demo + html;
+}
+function selMes(incluirAno = true) {
+  return `<select class="pill" data-act="mes">${incluirAno ? `<option value="ano" ${mesSel === 'ano' ? 'selected' : ''}>Ano todo (mar/27–fev/28)</option>` : ''}${MESES.map(m => `<option value="${m}" ${m === mesSel ? 'selected' : ''}>${mesLabel(m)}</option>`).join('')}</select>`;
+}
+
+/* =========================================================
+   Páginas
+   ========================================================= */
+function pgPainel() {
+  const m = mesSel;
+  const rec = receitaPorCanal(m), meta = metaDe(m), tRec = soma(rec), tMeta = soma(meta);
+  const mg = margemDe(rec);
+  let custos, resultado;
+  if (m === 'ano') {
+    custos = MESES.reduce((a, x) => { const c = custosDoMes(x); return a + c.fixos + c.midia + c.proLabore + c.kits; }, 0);
+    resultado = mg - custos;
+  } else { const r = resultadoDoMes(m); custos = r.custos.fixos + r.custos.midia + r.custos.proLabore + r.custos.kits; resultado = r.resultado; }
+  const vLoja = (m === 'ano' ? db.vendas : vendasDoMes(m)).filter(v => v.canal === 'loja');
+  const pedidos = vLoja.reduce((a, v) => a + (+v.qtd || 0), 0);
+  const ticket = pedidos ? rec.loja / pedidos : 0;
+  const atingido = tMeta ? tRec / tMeta : 0;
+
+  // gráfico 12 meses
+  const maxV = Math.max(1, ...MESES.map(x => Math.max(soma(receitaPorCanal(x)), soma(METAS[x]))));
+  const chart = MESES.map(x => {
+    const r = receitaPorCanal(x), tm = soma(METAS[x]);
+    const segs = Object.keys(CANAIS).map(c => r[c] ? `<i style="height:${(r[c] / maxV) * 180}px;background:${CANAIS[c].cor}" title="${CANAIS[c].curto}: ${brl(r[c])}"></i>` : '').join('');
+    return `<div class="col ${x === m ? 'sel' : ''}" data-act="mes-chart" data-m="${x}" title="${mesLabel(x)}: ${brl(soma(r))} de ${brl(tm)}">
+      ${tm ? `<div class="meta" style="bottom:${(tm / maxV) * 180 + 18}px"></div>` : ''}
+      <div class="stack">${segs}</div><div class="lbl">${mesLabel(x, false)}</div></div>`;
+  }).join('');
+
+  // tabela por canal
+  const linhas = Object.keys(CANAIS).map(c => {
+    const part = mg ? (rec[c] * CANAIS[c].margem) / mg : 0;
+    const at = meta[c] ? rec[c] / meta[c] : null;
+    return `<tr><td><span class="tag t-${c}">${CANAIS[c].nome}</span></td><td class="num">${brl(rec[c])}</td><td class="num muted">${brl(meta[c])}</td>
+      <td class="num">${at === null ? '<span class="muted">–</span>' : `<span class="${at >= 1 ? 'pos' : ''}">${pct(at)}</span>`}</td>
+      <td class="num">${mg ? (part > CFG.limiteCanal ? `<span class="pill-warn">${pct(part)}</span>` : pct(part)) : '–'}</td></tr>`;
+  }).join('');
+
+  // funil B2B
+  const funil = ETAPAS.map(e => { const it = db.empresas.filter(x => x.etapa === e.id); return { e, n: it.length, v: it.reduce((a, x) => a + (+x.kits || 0) * (+x.valorKit || 0), 0) }; });
+  // parceiras
+  const ranking = db.parceiras.map(p => { const vs = vendasDaParceira(p); return { p, pedidos: vs.reduce((a, v) => a + (+v.qtd || 0), 0), receita: vs.reduce((a, v) => a + (+v.valor || 0), 0) }; }).sort((a, b) => b.receita - a.receita).slice(0, 5);
+  // alertas
+  const alertas = [];
+  if (m !== 'ano') {
+    Object.keys(CANAIS).forEach(c => { const part = mg ? (rec[c] * CANAIS[c].margem) / mg : 0; if (part > CFG.limiteCanal) alertas.push(`<div class="alert warn">⚠︎ <span><b>${CANAIS[c].curto}</b> responde por ${pct(part)} da margem do mês. A meta é nenhum canal acima de 60%.</span></div>`); });
+    if (tMeta && atingido < 0.7 && vendasDoMes(m).length) alertas.push(`<div class="alert bad">↓ <span>O mês está em <b>${pct(atingido)}</b> da meta de receita do BP.</span></div>`);
+    if (tMeta && atingido >= 1) alertas.push(`<div class="alert ok">✓ <span>Meta de receita do mês <b>batida</b> (${pct(atingido)}).</span></div>`);
+    const naoPagas = db.parceiras.filter(p => p.kitEnviadoEm && vendasDaParceira(p).reduce((a, v) => a + (+v.qtd || 0), 0) < CFG.vendasPagamKit).length;
+    if (naoPagas) alertas.push(`<div class="alert">♡ <span><b>${naoPagas} parceira${naoPagas > 1 ? 's' : ''}</b> ainda não ${naoPagas > 1 ? 'venderam' : 'vendeu'} as ${CFG.vendasPagamKit} vendas que pagam o kit.</span></div>`);
+    const propostas = db.empresas.filter(e => e.etapa === 'proposta').length;
+    if (propostas) alertas.push(`<div class="alert">✉︎ <span><b>${propostas} proposta${propostas > 1 ? 's' : ''}</b> corporativa${propostas > 1 ? 's' : ''} aguardando resposta.</span></div>`);
+  }
+  if (!alertas.length) alertas.push('<div class="alert">Nenhum alerta para este período.</div>');
+
+  return `
+  <div class="page-head"><div><h1>Painel</h1><p>Como estão as vendas em relação às metas do plano de negócios.</p></div>
+    <div class="head-actions">${selMes()}<button class="btn primary" data-act="nova-venda">+ Registrar venda</button></div></div>
+  <div class="grid kpis">
+    <div class="card kpi"><div class="label">Receita ${m === 'ano' ? 'no ano' : 'do mês'}</div><div class="value">${brl(tRec)}</div><div class="sub">meta ${brl(tMeta)} · <b>${tMeta ? pct(atingido) : '–'}</b></div><div class="bar"><i style="width:${Math.min(100, atingido * 100)}%"></i></div></div>
+    <div class="card kpi"><div class="label">Margem estimada</div><div class="value">${brl(mg)}</div><div class="sub">${tRec ? pct(mg / tRec) : '–'} da receita</div></div>
+    <div class="card kpi"><div class="label">Resultado após pró-labore</div><div class="value ${resultado >= 0 ? 'pos' : 'neg'}">${brl(resultado)}</div><div class="sub">custos ${brl(custos)}</div></div>
+    <div class="card kpi"><div class="label">Pedidos da loja</div><div class="value">${nInt(pedidos)}</div><div class="sub">ticket médio <b>${pedidos ? brl(ticket) : '–'}</b> · meta R$ 200</div></div>
+  </div>
+  <div class="grid two section-gap">
+    <div class="card"><h2>Receita mês a mês <small>clique num mês para ver o detalhe</small></h2><div class="chart">${chart}</div>
+      <div class="legend">${Object.keys(CANAIS).map(c => `<span><i style="background:${CANAIS[c].cor}"></i>${CANAIS[c].curto}</span>`).join('')}<span><i class="dash"></i>Meta do BP</span></div></div>
+    <div class="card"><h2>Alertas</h2><div class="alerts">${alertas.join('')}</div></div>
+  </div>
+  <div class="grid two section-gap">
+    <div class="card"><h2>Por canal <small>participação na margem: limite de 60%</small></h2><div class="table-wrap"><table>
+      <thead><tr><th>Canal</th><th class="num">Realizado</th><th class="num">Meta</th><th class="num">Atingido</th><th class="num">Na margem</th></tr></thead>
+      <tbody>${linhas}</tbody><tfoot><tr><td>Total</td><td class="num">${brl(tRec)}</td><td class="num">${brl(tMeta)}</td><td class="num">${tMeta ? pct(atingido) : '–'}</td><td></td></tr></tfoot></table></div></div>
+    <div class="card"><h2>Funil corporativo <button class="btn small ghost" data-go="empresas">Abrir</button></h2><div class="table-wrap"><table><tbody>
+      ${funil.map(f => `<tr><td>${f.e.nome}</td><td class="num">${f.n}</td><td class="num muted">${brl(f.v)}</td></tr>`).join('')}
+      </tbody></table></div></div>
+  </div>
+  <div class="grid two section-gap">
+    <div class="card"><h2>Parceiras que mais vendem <button class="btn small ghost" data-go="parceiras">Abrir</button></h2>
+      ${ranking.length ? `<div class="table-wrap"><table><thead><tr><th>Parceira</th><th>Cupom</th><th class="num">Pedidos</th><th class="num">Receita</th><th class="num">Kit</th></tr></thead><tbody>
+      ${ranking.map(r => `<tr><td>${esc(r.p.nome)}</td><td><span class="chip">${esc(r.p.cupom)}</span></td><td class="num">${r.pedidos}</td><td class="num">${brl(r.receita)}</td><td class="num">${r.pedidos >= CFG.vendasPagamKit ? '<span class="pill-ok">pago</span>' : `<span class="pill-warn">faltam ${CFG.vendasPagamKit - r.pedidos}</span>`}</td></tr>`).join('')}
+      </tbody></table></div>` : '<p class="empty">Nenhuma parceira cadastrada.</p>'}</div>
+    <div class="card"><h2>Lista VIP <button class="btn small ghost" data-go="leads">Abrir</button></h2>
+      <div class="kpi"><div class="value">${nInt(leadsAtuais().length)}</div><div class="sub">pessoas na lista</div></div>
+      <div class="section-gap">${Object.keys(INTERESSES).map(k => { const n = leadsAtuais().filter(l => (l.interesses || []).includes(k)).length; return `<span class="chip">${INTERESSES[k]}: <b>${n}</b></span>`; }).join(' ')}</div></div>
+  </div>`;
+}
+
+function pgVendas() {
+  let lista = mesSel === 'ano' ? db.vendas.slice() : vendasDoMes(mesSel);
+  if (filtroCanal !== 'todos') lista = lista.filter(v => v.canal === filtroCanal);
+  lista.sort((a, b) => b.data.localeCompare(a.data));
+  const total = lista.reduce((a, v) => a + (+v.valor || 0), 0), qtd = lista.reduce((a, v) => a + (+v.qtd || 0), 0);
+  return `
+  <div class="page-head"><div><h1>Vendas</h1><p>Lançamentos de todos os canais. Valores em receita líquida (depois do desconto).</p></div>
+    <div class="head-actions">${selMes()}
+      <select class="pill" data-act="filtro-canal"><option value="todos">Todos os canais</option>${Object.keys(CANAIS).map(c => `<option value="${c}" ${filtroCanal === c ? 'selected' : ''}>${CANAIS[c].nome}</option>`).join('')}</select>
+      <button class="btn primary" data-act="nova-venda">+ Registrar venda</button></div></div>
+  <div class="card"><div class="table-wrap"><table>
+    <thead><tr><th>Data</th><th>Canal</th><th>Descrição</th><th>Origem</th><th class="num">Pedidos/itens</th><th class="num">Valor</th><th></th></tr></thead>
+    <tbody>${lista.length ? lista.map(v => `<tr><td>${dataBR(v.data)}</td><td><span class="tag t-${v.canal}">${CANAIS[v.canal].curto}</span></td><td>${esc(v.descricao)}</td>
+      <td>${v.cupom ? `<span class="chip">cupom ${esc(v.cupom)}</span>` : ''}${v.ref ? `<span class="chip">${esc(v.ref)}</span>` : ''}</td>
+      <td class="num">${nInt(+v.qtd)}</td><td class="num">${brl(+v.valor, 2)}</td>
+      <td class="num"><button class="icon-btn" data-act="editar-venda" data-id="${v.id}" title="Editar">✎</button><button class="icon-btn" data-act="excluir-venda" data-id="${v.id}" title="Excluir">✕</button></td></tr>`).join('') : '<tr><td colspan="7" class="empty">Nenhuma venda neste filtro.</td></tr>'}</tbody>
+    ${lista.length ? `<tfoot><tr><td colspan="4">${lista.length} lançamento${lista.length > 1 ? 's' : ''}</td><td class="num">${nInt(qtd)}</td><td class="num">${brl(total, 2)}</td><td></td></tr></tfoot>` : ''}
+  </table></div><p class="note">Dica: a loja pode ser lançada por semana (soma dos pedidos). Vendas com cupom de parceira vão em lançamento separado, com o cupom, para calcular a comissão.</p></div>`;
+}
+
+function pgEmpresas() {
+  const cols = ETAPAS.map((e, i) => {
+    const itens = db.empresas.filter(x => x.etapa === e.id);
+    const tot = itens.reduce((a, x) => a + (+x.kits || 0) * (+x.valorKit || 0), 0);
+    return `<div class="kcol"><h3>${e.nome}<span>${itens.length}</span></h3><div class="ktotal">${brl(tot)}</div>
+      ${itens.map(x => `<div class="kcard"><b>${esc(x.empresa)}</b><div class="meta-l">${esc(x.ocasiao || '')}${x.contato ? ' · ' + esc(x.contato) : ''}</div>
+        <div class="val">${brl((+x.kits || 0) * (+x.valorKit || 0))}</div><div class="meta-l">${nInt(+x.kits)} kits × ${brl(+x.valorKit)}${x.prazo ? ' · entrega ' + dataBR(x.prazo) : ''}</div>
+        <div class="acts">${i > 0 ? `<button class="icon-btn" data-act="etapa" data-id="${x.id}" data-dir="-1" title="Voltar etapa">←</button>` : ''}
+          ${i < ETAPAS.length - 1 ? `<button class="icon-btn" data-act="etapa" data-id="${x.id}" data-dir="1" title="Avançar etapa">→</button>` : ''}
+          <span class="spacer"></span>
+          ${(e.id === 'fechado' || e.id === 'entregue') && !x.vendaId ? `<button class="btn small" data-act="b2b-venda" data-id="${x.id}">Lançar venda</button>` : ''}
+          ${x.vendaId ? '<span class="pill-ok">venda lançada</span>' : ''}
+          <button class="icon-btn" data-act="editar-empresa" data-id="${x.id}" title="Editar">✎</button>
+          ${e.id !== 'entregue' ? `<button class="icon-btn" data-act="perder" data-id="${x.id}" title="Marcar como perdida">✕</button>` : ''}</div></div>`).join('')}
+    </div>`;
+  }).join('');
+  const perdidas = db.empresas.filter(x => x.etapa === 'perdido');
+  return `
+  <div class="page-head"><div><h1>Empresas (B2B)</h1><p>Funil dos kits corporativos da VF Minimalista: do primeiro contato à entrega.</p></div>
+    <div class="head-actions"><button class="btn primary" data-act="nova-empresa">+ Nova oportunidade</button></div></div>
+  <div class="kanban">${cols}</div>
+  <div class="card section-gap"><h2>Perdidas <small>${perdidas.length}</small> <button class="btn small ghost" data-act="toggle-perdidas">${mostrarPerdidas ? 'Esconder' : 'Mostrar'}</button></h2>
+    ${mostrarPerdidas ? (perdidas.length ? `<div class="table-wrap"><table><tbody>${perdidas.map(x => `<tr><td>${esc(x.empresa)}</td><td>${esc(x.ocasiao || '')}</td><td class="muted">${esc(x.obs || '')}</td><td class="num">${brl((+x.kits || 0) * (+x.valorKit || 0))}</td><td class="num"><button class="btn small" data-act="reabrir" data-id="${x.id}">Reabrir</button></td></tr>`).join('')}</tbody></table></div>` : '<p class="empty">Nenhuma oportunidade perdida.</p>') : ''}
+    <p class="note">Processo do BP: lista de empresas → catálogo → amostra → proposta com validade → 50% de entrada → produção sob encomenda → entrega → pós-venda.</p></div>`;
+}
+
+function pgParceiras() {
+  const linhas = db.parceiras.map(p => {
+    const vs = vendasDaParceira(p), pedidos = vs.reduce((a, v) => a + (+v.qtd || 0), 0), receita = vs.reduce((a, v) => a + (+v.valor || 0), 0);
+    const comissao = receita * (p.comissao != null ? p.comissao / 100 : CFG.comissaoParceira);
+    const kit = !p.kitEnviadoEm ? '<span class="muted">não enviado</span>' : (pedidos >= CFG.vendasPagamKit ? '<span class="pill-ok">kit pago</span>' : `<span class="pill-warn">faltam ${CFG.vendasPagamKit - pedidos}</span>`);
+    return { p, pedidos, receita, comissao, kit };
+  }).sort((a, b) => b.receita - a.receita);
+  const tot = linhas.reduce((a, l) => ({ pedidos: a.pedidos + l.pedidos, receita: a.receita + l.receita, comissao: a.comissao + l.comissao }), { pedidos: 0, receita: 0, comissao: 0 });
+  const kitsEnviados = db.parceiras.filter(p => p.kitEnviadoEm).length;
+  const totalLoja = db.vendas.filter(v => v.canal === 'loja').reduce((a, v) => a + (+v.valor || 0), 0);
+  return `
+  <div class="page-head"><div><h1>Parceiras</h1><p>Programa de influenciadoras: kit com o nome de cada uma, cupom e comissão por venda.</p></div>
+    <div class="head-actions"><button class="btn primary" data-act="nova-parceira">+ Nova parceira</button></div></div>
+  <div class="grid kpis">
+    <div class="card kpi"><div class="label">Parceiras ativas</div><div class="value">${db.parceiras.filter(p => p.status !== 'inativa').length}</div><div class="sub">${kitsEnviados} kits enviados · ${brl(kitsEnviados * CFG.custoKitParceira)}</div></div>
+    <div class="card kpi"><div class="label">Vendas com cupom</div><div class="value">${brl(tot.receita)}</div><div class="sub">${nInt(tot.pedidos)} pedidos</div></div>
+    <div class="card kpi"><div class="label">Fatia das vendas da loja</div><div class="value">${totalLoja ? pct(tot.receita / totalLoja) : '–'}</div><div class="sub">meta do BP: 25%</div></div>
+    <div class="card kpi"><div class="label">Comissões a pagar</div><div class="value">${brl(tot.comissao)}</div><div class="sub">10% sobre a venda com cupom</div></div>
+  </div>
+  <div class="card section-gap"><div class="table-wrap"><table>
+    <thead><tr><th>Parceira</th><th>Nicho</th><th>Cupom</th><th>Kit enviado</th><th class="num">Pedidos</th><th class="num">Receita</th><th class="num">Comissão</th><th>Kit</th><th></th></tr></thead>
+    <tbody>${linhas.length ? linhas.map(l => `<tr><td><b>${esc(l.p.nome)}</b><div class="muted">${esc(l.p.instagram || '')}${l.p.seguidores ? ' · ' + nInt(+l.p.seguidores) + ' seguidores' : ''}</div></td>
+      <td>${esc(l.p.nicho || '')}</td><td><span class="chip">${esc(l.p.cupom)}</span></td><td>${dataBR(l.p.kitEnviadoEm) || '–'}</td>
+      <td class="num">${l.pedidos}</td><td class="num">${brl(l.receita)}</td><td class="num">${brl(l.comissao)}</td><td>${l.kit}</td>
+      <td class="num"><button class="icon-btn" data-act="editar-parceira" data-id="${l.p.id}">✎</button><button class="icon-btn" data-act="excluir-parceira" data-id="${l.p.id}">✕</button></td></tr>`).join('') : '<tr><td colspan="9" class="empty">Cadastre a primeira parceira.</td></tr>'}</tbody>
+  </table></div><p class="note">Regra do BP: cerca de ${CFG.vendasPagamKit} vendas com cupom pagam o kit de R$ ${CFG.custoKitParceira}. A cada trimestre, fica quem vende; a melhor ganha uma coleção assinada (15%).</p></div>`;
+}
+
+function pgRevenda() {
+  const linhas = db.revendedoras.map(r => {
+    const vs = db.vendas.filter(v => v.canal === 'revenda' && v.revendedoraId === r.id);
+    return { r, pedidos: vs.length, total: vs.reduce((a, v) => a + (+v.valor || 0), 0), ultima: vs.map(v => v.data).sort().pop() };
+  }).sort((a, b) => b.total - a.total);
+  return `
+  <div class="page-head"><div><h1>Revenda</h1><p>Parceiras, papelarias boutique e lojas de presente que compram com desconto para revender.</p></div>
+    <div class="head-actions"><button class="btn" data-act="nova-venda-revenda">+ Pedido de revenda</button><button class="btn primary" data-act="nova-revendedora">+ Nova revendedora</button></div></div>
+  <div class="grid two">
+    <div class="card"><div class="table-wrap"><table>
+      <thead><tr><th>Revendedora</th><th>Tipo</th><th>Cidade</th><th class="num">Pedidos</th><th class="num">Total comprado</th><th>Última compra</th><th></th></tr></thead>
+      <tbody>${linhas.length ? linhas.map(l => `<tr><td><b>${esc(l.r.nome)}</b><div class="muted">${esc(l.r.contato || '')}</div></td><td>${esc(l.r.tipo || '')}</td><td>${esc(l.r.cidade || '')}</td>
+        <td class="num">${l.pedidos}</td><td class="num">${brl(l.total)}</td><td>${dataBR(l.ultima) || '–'}</td>
+        <td class="num"><button class="icon-btn" data-act="editar-revendedora" data-id="${l.r.id}">✎</button><button class="icon-btn" data-act="excluir-revendedora" data-id="${l.r.id}">✕</button></td></tr>`).join('') : '<tr><td colspan="7" class="empty">Nenhuma revendedora ainda. A revenda abre em agosto de 2027.</td></tr>'}</tbody>
+    </table></div></div>
+    <div class="card"><h2>Tabela de revenda</h2><table><thead><tr><th>Pedido (preço de tabela)</th><th class="num">Desconto</th></tr></thead><tbody>
+      <tr><td>A partir de R$ 500 (mínimo)</td><td class="num">30%</td></tr><tr><td>A partir de R$ 1.000</td><td class="num">35%</td></tr><tr><td>A partir de R$ 2.000</td><td class="num">40%</td></tr></tbody></table>
+      <p class="note">Regras: não vender abaixo do preço da loja · proibido revender em marketplaces · frete por conta da revendedora · pagamento antecipado. 15 pedidos por mês pagam o pró-labore.</p></div>
+  </div>`;
+}
+
+function pgClube() {
+  const regs = db.clube.slice().sort((a, b) => a.mes.localeCompare(b.mes));
+  const ult = regs[regs.length - 1];
+  return `
+  <div class="page-head"><div><h1>Clube Ritual do Mês</h1><p>Assinantes mês a mês. R$ ${CFG.mensalidadeClube} por mês, frete incluso. Abre em julho de 2027.</p></div>
+    <div class="head-actions"><button class="btn primary" data-act="novo-clube">+ Fechar mês do clube</button></div></div>
+  <div class="grid kpis">
+    <div class="card kpi"><div class="label">Assinantes ativos</div><div class="value">${ult ? nInt(+ult.ativos) : 0}</div><div class="sub">${ult ? mesLabel(ult.mes) : 'nenhum mês fechado'}</div></div>
+    <div class="card kpi"><div class="label">Receita recorrente</div><div class="value">${brl(ult ? ult.ativos * CFG.mensalidadeClube : 0)}</div><div class="sub">por mês</div></div>
+    <div class="card kpi"><div class="label">Cancelamento</div><div class="value">${ult && ult.anteriores ? pct(ult.cancelados / ult.anteriores) : '–'}</div><div class="sub">meta: até 10% ao mês</div></div>
+    <div class="card kpi"><div class="label">Meta de fev/28</div><div class="value">121</div><div class="sub">assinantes (BP v3)</div></div>
+  </div>
+  <div class="card section-gap"><div class="table-wrap"><table>
+    <thead><tr><th>Mês</th><th class="num">Novos</th><th class="num">Cancelados</th><th class="num">Ativos</th><th class="num">Cancelamento</th><th class="num">Mensalidades</th><th></th></tr></thead>
+    <tbody>${regs.length ? regs.map(r => `<tr><td>${mesLabel(r.mes)}</td><td class="num">${nInt(+r.novos)}</td><td class="num">${nInt(+r.cancelados)}</td><td class="num"><b>${nInt(+r.ativos)}</b></td>
+      <td class="num">${r.anteriores ? (r.cancelados / r.anteriores > 0.10 ? `<span class="pill-bad">${pct(r.cancelados / r.anteriores)}</span>` : pct(r.cancelados / r.anteriores)) : '–'}</td>
+      <td class="num">${brl(r.ativos * CFG.mensalidadeClube)}</td><td class="num"><button class="icon-btn" data-act="excluir-clube" data-id="${r.id}">✕</button></td></tr>`).join('') : '<tr><td colspan="7" class="empty">Nenhum mês fechado.</td></tr>'}</tbody>
+  </table></div><p class="note">Ao fechar o mês, o sistema calcula os ativos (anteriores + novos − cancelados) e lança automaticamente as mensalidades como venda do canal Clube.</p></div>`;
+}
+
+function pgLeads() {
+  const todos = leadsAtuais().slice().sort((a, b) => (b.criadoEm || '').localeCompare(a.criadoEm || ''));
+  const lista = filtroInteresse === 'todos' ? todos : todos.filter(l => (l.interesses || []).includes(filtroInteresse));
+  return `
+  <div class="page-head"><div><h1>Lista VIP</h1><p>Quem se cadastrou na página institucional. ${modo === 'demo' ? 'No modo demonstração, a lista é fictícia.' : 'Por enquanto, os cadastros ficam salvos neste navegador.'}</p></div>
+    <div class="head-actions"><select class="pill" data-act="filtro-interesse"><option value="todos">Todos os interesses</option>${Object.keys(INTERESSES).map(k => `<option value="${k}" ${filtroInteresse === k ? 'selected' : ''}>${INTERESSES[k]}</option>`).join('')}</select>
+      <button class="btn" data-act="csv-leads">Exportar CSV</button></div></div>
+  <div class="card"><div class="table-wrap"><table>
+    <thead><tr><th>Nome</th><th>Contato</th><th>Interesses</th><th>Cadastro</th><th>Status</th></tr></thead>
+    <tbody>${lista.length ? lista.map(l => { const st = db.leadsStatus[l.id]; return `<tr><td><b>${esc(l.nome)}</b></td><td>${esc(l.contato)}</td>
+      <td>${(l.interesses || []).map(i => `<span class="chip">${esc(INTERESSES[i] || i)}</span>`).join('') || '<span class="muted">–</span>'}</td>
+      <td>${l.criadoEm ? dataBR(l.criadoEm.slice(0, 10)) : ''}</td>
+      <td>${st ? '<span class="pill-ok">contatado</span>' : `<button class="btn small" data-act="contatado" data-id="${esc(l.id)}">Marcar contatado</button>`}</td></tr>`; }).join('') : '<tr><td colspan="5" class="empty">Ninguém na lista ainda. Os cadastros feitos na página institucional aparecem aqui.</td></tr>'}</tbody>
+  </table></div></div>`;
+}
+
+function pgAjustes() {
+  return `
+  <div class="page-head"><div><h1>Metas e ajustes</h1><p>Metas mensais do BP v3 (cenário base) e configurações do sistema.</p></div></div>
+  <div class="card"><h2>Metas de receita líquida por canal <small>fonte: Viabilidade_Vanilla_Flor_2027_v3.xlsx</small></h2><div class="table-wrap"><table>
+    <thead><tr><th>Mês</th>${Object.keys(CANAIS).map(c => `<th class="num">${CANAIS[c].curto}</th>`).join('')}<th class="num">Total</th></tr></thead>
+    <tbody>${MESES.map(m => `<tr><td>${mesLabel(m)}</td>${Object.keys(CANAIS).map(c => `<td class="num">${brl(METAS[m][c])}</td>`).join('')}<td class="num"><b>${brl(soma(METAS[m]))}</b></td></tr>`).join('')}</tbody>
+    <tfoot><tr><td>Total</td>${Object.keys(CANAIS).map(c => `<td class="num">${brl(MESES.reduce((a, m) => a + METAS[m][c], 0))}</td>`).join('')}<td class="num">${brl(MESES.reduce((a, m) => a + soma(METAS[m]), 0))}</td></tr></tfoot>
+  </table></div></div>
+  <div class="grid three section-gap">
+    <div class="card"><h2>Premissas</h2><table><tbody>
+      <tr><td>Margem da loja</td><td class="num">${pct(CANAIS.loja.margem)}</td></tr><tr><td>Margem do B2B</td><td class="num">${pct(CANAIS.b2b.margem)}</td></tr>
+      <tr><td>Margem do clube</td><td class="num">${pct(CANAIS.clube.margem)}</td></tr><tr><td>Margem da revenda</td><td class="num">${pct(CANAIS.revenda.margem)}</td></tr>
+      <tr><td>Fixos operacionais</td><td class="num">${brl(CFG.fixosOperacionais)}</td></tr><tr><td>Mídia paga</td><td class="num">${brl(CFG.midia)}</td></tr>
+      <tr><td>Pró-labore (desde jun/27)</td><td class="num">${brl(CFG.proLabore)}</td></tr></tbody></table></div>
+    <div class="card"><h2>Modo</h2><p>${modo === 'demo' ? 'Você está vendo <b>dados de demonstração</b>.' : 'Você está usando <b>dados reais</b>.'}</p>
+      <div class="head-actions section-gap">${modo === 'demo' ? '<button class="btn primary" data-act="modo-real">Usar dados reais</button><button class="btn" data-act="regerar-demo">Recriar exemplo</button>' : '<button class="btn" data-act="modo-demo">Ver demonstração</button>'}</div>
+      <p class="note">Os dados reais e os de demonstração ficam guardados separados: um nunca apaga o outro.</p></div>
+    <div class="card"><h2>Backup</h2><p>Baixe uma cópia dos dados ${modo === 'demo' ? 'de demonstração' : 'reais'} em arquivo.</p>
+      <div class="head-actions section-gap"><button class="btn" data-act="backup">Baixar backup</button>${modo === 'real' ? '<button class="btn danger" data-act="limpar">Apagar dados reais</button>' : ''}</div>
+      <p class="note">Próximo passo: sincronizar com o Supabase para usar no celular e no notebook ao mesmo tempo.</p></div>
+  </div>`;
+}
+
+/* =========================================================
+   Formulários
+   ========================================================= */
+let onSalvarModal = null;
+function abrirForm(titulo, campos, valores, aoSalvar) {
+  $('#modalTitle').textContent = titulo;
+  $('#modalFields').innerHTML = campos.map(f => {
+    const v = valores[f.name] ?? f.value ?? '';
+    let input;
+    if (f.type === 'select') input = `<select name="${f.name}" ${f.required ? 'required' : ''}>${f.options.map(o => `<option value="${esc(o.value)}" ${String(o.value) === String(v) ? 'selected' : ''}>${esc(o.label)}</option>`).join('')}</select>`;
+    else if (f.type === 'textarea') input = `<textarea name="${f.name}" rows="3">${esc(v)}</textarea>`;
+    else input = `<input name="${f.name}" type="${f.type || 'text'}" value="${esc(v)}" ${f.required ? 'required' : ''} ${f.step ? `step="${f.step}"` : ''} ${f.min != null ? `min="${f.min}"` : ''} placeholder="${esc(f.placeholder || '')}">`;
+    return `<div class="f ${f.full ? 'full' : ''}" data-field="${f.name}" ${f.showIf ? `data-showif="${esc(f.showIf)}"` : ''}><label>${f.label}</label>${input}${f.hint ? `<span class="hint">${f.hint}</span>` : ''}</div>`;
+  }).join('');
+  onSalvarModal = aoSalvar;
+  atualizarVisibilidade();
+  $('#modalBg').classList.add('open');
+  setTimeout(() => { const first = $('#modalFields input, #modalFields select'); first && first.focus(); }, 30);
+}
+function atualizarVisibilidade() {
+  const form = $('#modalForm');
+  form.querySelectorAll('[data-showif]').forEach(el => {
+    const [campo, valor] = el.dataset.showif.split('=');
+    const atual = form.elements[campo] ? form.elements[campo].value : '';
+    el.style.display = valor.split('|').includes(atual) ? '' : 'none';
+  });
+}
+function fecharModal() { $('#modalBg').classList.remove('open'); onSalvarModal = null; }
+$('#modalForm').addEventListener('change', atualizarVisibilidade);
+$('#modalForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const dados = Object.fromEntries(new FormData(e.target).entries());
+  if (onSalvarModal && onSalvarModal(dados) !== false) { fecharModal(); salvar(); render(); }
+});
+$('#modalCancel').addEventListener('click', fecharModal);
+$('#modalBg').addEventListener('click', e => { if (e.target.id === 'modalBg') fecharModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('#modalBg').classList.contains('open')) fecharModal(); });
+
+function formVenda(v = {}, canalFixo) {
+  const parcOpts = [{ value: '', label: 'Sem cupom de parceira' }].concat(db.parceiras.map(p => ({ value: p.cupom, label: `${p.cupom} — ${p.nome}` })));
+  const revOpts = [{ value: '', label: 'Selecione' }].concat(db.revendedoras.map(r => ({ value: r.id, label: r.nome })));
+  abrirForm(v.id ? 'Editar venda' : 'Registrar venda', [
+    { name: 'data', label: 'Data', type: 'date', required: true, value: hojeISO() },
+    { name: 'canal', label: 'Canal', type: 'select', options: Object.keys(CANAIS).map(c => ({ value: c, label: CANAIS[c].nome })), value: canalFixo || 'loja' },
+    { name: 'descricao', label: 'Descrição', full: true, required: true, placeholder: 'Ex.: Vendas da loja — semana 2' },
+    { name: 'qtd', label: 'Pedidos / itens', type: 'number', min: 0, value: 1, required: true },
+    { name: 'valor', label: 'Valor (R$, receita líquida)', type: 'number', step: '0.01', min: 0, required: true },
+    { name: 'cupom', label: 'Cupom de parceira', type: 'select', options: parcOpts, full: true, showIf: 'canal=loja' },
+    { name: 'revendedoraId', label: 'Revendedora', type: 'select', options: revOpts, full: true, showIf: 'canal=revenda', hint: db.revendedoras.length ? '' : 'Cadastre a revendedora na página Revenda.' }
+  ], v, d => {
+    const reg = { id: v.id || uid(), data: d.data, canal: d.canal, descricao: d.descricao.trim(), qtd: +d.qtd || 0, valor: +d.valor || 0,
+      cupom: d.canal === 'loja' ? (d.cupom || '') : '', revendedoraId: d.canal === 'revenda' ? (d.revendedoraId || '') : '', ref: v.ref || '' };
+    if (reg.canal === 'revenda' && reg.revendedoraId) reg.ref = (db.revendedoras.find(r => r.id === reg.revendedoraId) || {}).nome || '';
+    if (v.id) db.vendas[db.vendas.findIndex(x => x.id === v.id)] = reg; else db.vendas.push(reg);
+    if (MESES.includes(mesDe(reg.data))) mesSel = mesDe(reg.data);
+    toast(v.id ? 'Venda atualizada' : 'Venda registrada');
+  });
+}
+function formEmpresa(x = {}) {
+  abrirForm(x.id ? 'Editar oportunidade' : 'Nova oportunidade corporativa', [
+    { name: 'empresa', label: 'Empresa', full: true, required: true },
+    { name: 'contato', label: 'Contato (nome / cargo)' },
+    { name: 'ocasiao', label: 'Ocasião', type: 'select', options: ['Fim de ano', 'Boas-vindas', 'Dia da Mulher', 'Dia das Mães', 'Dia dos Pais', 'Evento', 'Outro'].map(o => ({ value: o, label: o })) },
+    { name: 'kits', label: 'Quantidade de kits', type: 'number', min: 1, value: 20, required: true },
+    { name: 'valorKit', label: 'Valor por kit (R$)', type: 'number', min: 0, step: '0.01', value: 320, required: true },
+    { name: 'etapa', label: 'Etapa', type: 'select', options: ETAPAS.map(e => ({ value: e.id, label: e.nome })), value: 'contato' },
+    { name: 'prazo', label: 'Data de entrega', type: 'date' },
+    { name: 'obs', label: 'Observações', type: 'textarea', full: true }
+  ], x, d => {
+    const reg = Object.assign({}, x, d, { id: x.id || uid(), kits: +d.kits, valorKit: +d.valorKit });
+    if (x.id) db.empresas[db.empresas.findIndex(e => e.id === x.id)] = reg; else db.empresas.push(reg);
+    toast('Oportunidade salva');
+  });
+}
+function formParceira(p = {}) {
+  abrirForm(p.id ? 'Editar parceira' : 'Nova parceira', [
+    { name: 'nome', label: 'Nome', required: true }, { name: 'instagram', label: 'Instagram / TikTok', placeholder: '@perfil' },
+    { name: 'nicho', label: 'Nicho', type: 'select', options: ['Studygram', 'Bullet journal', 'Concursos', 'Organização e rotina', 'Papelaria', 'Produtividade / carreira', 'Professoras'].map(o => ({ value: o, label: o })) },
+    { name: 'seguidores', label: 'Seguidores', type: 'number', min: 0 },
+    { name: 'cupom', label: 'Cupom', required: true, placeholder: 'EX.: ANA10' }, { name: 'comissao', label: 'Comissão (%)', type: 'number', min: 0, step: '0.5', value: 10 },
+    { name: 'kitEnviadoEm', label: 'Kit enviado em', type: 'date' },
+    { name: 'status', label: 'Status', type: 'select', options: [{ value: 'ativa', label: 'Ativa' }, { value: 'inativa', label: 'Inativa' }] }
+  ], p, d => {
+    const cupom = d.cupom.trim().toUpperCase();
+    if (db.parceiras.some(x => x.cupom.toUpperCase() === cupom && x.id !== p.id)) { toast('Esse cupom já é de outra parceira'); return false; }
+    const reg = Object.assign({}, p, d, { id: p.id || uid(), cupom, seguidores: +d.seguidores || 0, comissao: d.comissao === '' ? 10 : +d.comissao });
+    if (p.id && p.cupom && p.cupom !== cupom) db.vendas.forEach(v => { if (v.cupom && v.cupom.toUpperCase() === p.cupom.toUpperCase()) v.cupom = cupom; });
+    if (p.id) db.parceiras[db.parceiras.findIndex(x => x.id === p.id)] = reg; else db.parceiras.push(reg);
+    toast('Parceira salva');
+  });
+}
+function formRevendedora(r = {}) {
+  abrirForm(r.id ? 'Editar revendedora' : 'Nova revendedora', [
+    { name: 'nome', label: 'Nome / loja', full: true, required: true },
+    { name: 'tipo', label: 'Tipo', type: 'select', options: ['Parceira do programa', 'Papelaria boutique', 'Loja de presentes', 'Empreendedora'].map(o => ({ value: o, label: o })) },
+    { name: 'cidade', label: 'Cidade' }, { name: 'contato', label: 'WhatsApp / e-mail', full: true }
+  ], r, d => {
+    const reg = Object.assign({}, r, d, { id: r.id || uid() });
+    if (r.id) db.revendedoras[db.revendedoras.findIndex(x => x.id === r.id)] = reg; else db.revendedoras.push(reg);
+    toast('Revendedora salva');
+  });
+}
+function formClube() {
+  const regs = db.clube.slice().sort((a, b) => a.mes.localeCompare(b.mes));
+  const ult = regs[regs.length - 1];
+  const prox = ult ? MESES[Math.min(MESES.length - 1, MESES.indexOf(ult.mes) + 1)] : '2027-07';
+  abrirForm('Fechar mês do clube', [
+    { name: 'mes', label: 'Mês', type: 'select', options: MESES.map(m => ({ value: m, label: mesLabel(m) })), value: prox },
+    { name: 'anteriores', label: 'Ativos no início do mês', type: 'number', min: 0, value: ult ? ult.ativos : 0 },
+    { name: 'novos', label: 'Novas assinantes', type: 'number', min: 0, value: 0 },
+    { name: 'cancelados', label: 'Cancelamentos', type: 'number', min: 0, value: 0 }
+  ], {}, d => {
+    if (db.clube.some(c => c.mes === d.mes)) { toast('Esse mês já foi fechado'); return false; }
+    const ativos = Math.max(0, (+d.anteriores || 0) + (+d.novos || 0) - (+d.cancelados || 0));
+    const reg = { id: uid(), mes: d.mes, anteriores: +d.anteriores || 0, novos: +d.novos || 0, cancelados: +d.cancelados || 0, ativos };
+    const venda = { id: uid(), data: d.mes + '-05', canal: 'clube', descricao: `Mensalidades do clube — ${mesLabel(d.mes)}`, qtd: ativos, valor: ativos * CFG.mensalidadeClube, ref: 'clube' };
+    reg.vendaId = venda.id; db.clube.push(reg); db.vendas.push(venda);
+    toast(`Mês fechado: ${ativos} assinantes, ${brl(venda.valor)}`);
+  });
+}
+
+/* =========================================================
+   Ações (delegação de eventos)
+   ========================================================= */
+document.addEventListener('click', e => {
+  const go = e.target.closest('[data-go]'); if (go) return ir(go.dataset.go);
+  const pg = e.target.closest('[data-pg]'); if (pg) return ir(pg.dataset.pg);
+  const a = e.target.closest('[data-act]'); if (!a) return;
+  const id = a.dataset.id, act = a.dataset.act;
+  const acoes = {
+    'nova-venda': () => formVenda(),
+    'nova-venda-revenda': () => formVenda({}, 'revenda'),
+    'editar-venda': () => formVenda(db.vendas.find(v => v.id === id)),
+    'excluir-venda': () => { if (confirm('Excluir esta venda?')) { db.vendas = db.vendas.filter(v => v.id !== id); db.empresas.forEach(x => { if (x.vendaId === id) delete x.vendaId; }); salvar(); render(); toast('Venda excluída'); } },
+    'mes-chart': () => { mesSel = a.dataset.m; render(); },
+    'nova-empresa': () => formEmpresa(),
+    'editar-empresa': () => formEmpresa(db.empresas.find(x => x.id === id)),
+    'etapa': () => { const x = db.empresas.find(z => z.id === id); const i = ETAPAS.findIndex(s => s.id === x.etapa) + (+a.dataset.dir); if (ETAPAS[i]) { x.etapa = ETAPAS[i].id; salvar(); render(); } },
+    'perder': () => { const x = db.empresas.find(z => z.id === id); const motivo = prompt('Motivo (opcional):', x.obs || ''); if (motivo === null) return; x.etapa = 'perdido'; x.obs = motivo; salvar(); render(); toast('Marcada como perdida'); },
+    'reabrir': () => { db.empresas.find(z => z.id === id).etapa = 'contato'; salvar(); render(); },
+    'toggle-perdidas': () => { mostrarPerdidas = !mostrarPerdidas; render(); },
+    'b2b-venda': () => { const x = db.empresas.find(z => z.id === id); const v = { id: uid(), data: x.prazo || hojeISO(), canal: 'b2b', descricao: `${x.kits} kits — ${x.ocasiao || 'corporativo'}`, qtd: +x.kits, valor: (+x.kits) * (+x.valorKit), ref: x.empresa }; db.vendas.push(v); x.vendaId = v.id; salvar(); render(); toast(`Venda de ${brl(v.valor)} lançada`); },
+    'nova-parceira': () => formParceira(),
+    'editar-parceira': () => formParceira(db.parceiras.find(p => p.id === id)),
+    'excluir-parceira': () => { if (confirm('Excluir esta parceira? As vendas com o cupom continuam registradas.')) { db.parceiras = db.parceiras.filter(p => p.id !== id); salvar(); render(); } },
+    'nova-revendedora': () => formRevendedora(),
+    'editar-revendedora': () => formRevendedora(db.revendedoras.find(r => r.id === id)),
+    'excluir-revendedora': () => { if (confirm('Excluir esta revendedora?')) { db.revendedoras = db.revendedoras.filter(r => r.id !== id); salvar(); render(); } },
+    'novo-clube': () => formClube(),
+    'excluir-clube': () => { if (confirm('Excluir este mês do clube? As mensalidades lançadas também saem.')) { const c = db.clube.find(x => x.id === id); db.vendas = db.vendas.filter(v => v.id !== c.vendaId); db.clube = db.clube.filter(x => x.id !== id); salvar(); render(); } },
+    'contatado': () => { db.leadsStatus[id] = hojeISO(); salvar(); render(); },
+    'csv-leads': () => baixar('lista-vip.csv', 'Nome;Contato;Interesses;Cadastro\n' + leadsAtuais().map(l => [l.nome, l.contato, (l.interesses || []).map(i => INTERESSES[i] || i).join(', '), (l.criadoEm || '').slice(0, 10)].map(x => `"${String(x).replace(/"/g, '""')}"`).join(';')).join('\n'), 'text/csv;charset=utf-8'),
+    'backup': () => baixar(`vanilla-flor-${modo}-${hojeISO()}.json`, JSON.stringify(db, null, 2), 'application/json'),
+    'limpar': () => { if (confirm('Apagar TODOS os dados reais deste navegador? Baixe um backup antes.') && confirm('Tem certeza? Isso não pode ser desfeito.')) { db = vazio(); salvar(); render(); toast('Dados reais apagados'); } },
+    'modo-real': () => { modo = 'real'; db = Object.assign(vazio(), ls.get(K.real, {})); salvar(); mesSel = mesPadrao(); render(); toast('Agora com dados reais'); },
+    'modo-demo': () => { modo = 'demo'; db = ls.get(K.demo, null) || gerarDemo(); salvar(); mesSel = mesPadrao(); render(); toast('Modo demonstração'); },
+    'regerar-demo': () => { db = gerarDemo(); salvar(); mesSel = mesPadrao(); render(); toast('Exemplo recriado'); }
+  };
+  if (acoes[act]) acoes[act]();
+});
+document.addEventListener('change', e => {
+  const a = e.target.closest('[data-act]'); if (!a || e.target.closest('#modalForm')) return;
+  if (a.dataset.act === 'mes') { mesSel = a.value; render(); }
+  if (a.dataset.act === 'filtro-canal') { filtroCanal = a.value; render(); }
+  if (a.dataset.act === 'filtro-interesse') { filtroInteresse = a.value; render(); }
+});
+$('#openSide').addEventListener('click', () => $('#side').classList.toggle('open'));
+// se a lista VIP mudar em outra aba (página institucional), atualiza
+addEventListener('storage', e => { if (e.key === K.leads && modo === 'real') render(); });
+function baixar(nome, conteudo, tipo) {
+  const blob = new Blob(['﻿' + conteudo], { type: tipo });
+  const url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = nome; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/* =========================================================
+   Dados de demonstração (fictícios, mai–ago/2027)
+   ========================================================= */
+function gerarDemo() {
+  const d = vazio();
+  let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  const parcs = [
+    ['Ana Estuda (exemplo)', '@ana.estuda.exemplo', 'Studygram', 18400, 'ANA10'],
+    ['Bia Planner (exemplo)', '@biaplanner.exemplo', 'Bullet journal', 32100, 'BIA10'],
+    ['Cadernos da Lu (exemplo)', '@cadernosdalu.exemplo', 'Papelaria', 9800, 'LU10'],
+    ['Mari Concursos (exemplo)', '@mari.concursos.exemplo', 'Concursos', 41200, 'MARI10'],
+    ['Rotina da Gabi (exemplo)', '@rotinadagabi.exemplo', 'Organização e rotina', 6700, 'GABI10'],
+    ['Prof. Júlia (exemplo)', '@prof.julia.exemplo', 'Professoras', 12500, 'JULIA10']
+  ];
+  parcs.forEach(([nome, instagram, nicho, seguidores, cupom], i) => d.parceiras.push({ id: 'p' + i, nome, instagram, nicho, seguidores, cupom, comissao: 10, kitEnviadoEm: '2027-04-1' + (i % 6), status: 'ativa' }));
+  // loja: 4 semanas por mês + cupons
+  const plano = { '2027-05': 69, '2027-06': 47, '2027-07': 46, '2027-08': 24 };
+  Object.entries(plano).forEach(([m, total]) => {
+    const viaCupom = Math.round(total * 0.27), direto = total - viaCupom;
+    const semanas = m === '2027-08' ? 2 : 4;
+    for (let s = 0; s < semanas; s++) {
+      const q = Math.round(direto / semanas + (rnd() - 0.5) * 4);
+      d.vendas.push({ id: uid(), data: `${m}-${String(3 + s * 7).padStart(2, '0')}`, canal: 'loja', descricao: `Vendas da loja — semana ${s + 1}`, qtd: q, valor: Math.round(q * (186 + rnd() * 22) * 100) / 100, cupom: '' });
+    }
+    let resto = viaCupom;
+    d.parceiras.forEach((p, i) => {
+      if (resto <= 0) return;
+      const peso = [0.24, 0.3, 0.08, 0.26, 0.04, 0.08][i];
+      const q = Math.min(resto, Math.max(0, Math.round(viaCupom * peso + (rnd() - 0.4))));
+      if (!q) return; resto -= q;
+      d.vendas.push({ id: uid(), data: `${m}-${String(10 + i * 3).padStart(2, '0')}`, canal: 'loja', descricao: `Vendas com cupom ${p.cupom}`, qtd: q, valor: Math.round(q * (192 + rnd() * 18) * 100) / 100, cupom: p.cupom });
+    });
+  });
+  // B2B
+  const emp = [
+    ['Cooperativa Exemplo', 'Patrícia — RH', 'Dia das Mães', 20, 320, 'entregue', '2027-05-06'],
+    ['Clínica Modelo (exemplo)', 'Dr. Roberto — diretoria', 'Boas-vindas', 6, 300, 'entregue', '2027-07-15'],
+    ['Escritório Exemplo Advocacia', 'Fernanda — sócia', 'Dia dos Pais', 12, 340, 'fechado', '2027-08-08'],
+    ['Construtora Demonstração', 'Marcelo — marketing', 'Fim de ano', 60, 320, 'proposta', '2027-12-05'],
+    ['Agência Fictícia', 'Carla — atendimento', 'Fim de ano', 25, 290, 'amostra', ''],
+    ['Associação Comercial (exemplo)', 'Sérgio — eventos', 'Evento', 80, 260, 'contato', ''],
+    ['Contabilidade Exemplo', 'Luciana — sócia', 'Fim de ano', 15, 320, 'contato', '']
+  ];
+  emp.forEach(([empresa, contato, ocasiao, kits, valorKit, etapa, prazo], i) => {
+    const x = { id: 'e' + i, empresa, contato, ocasiao, kits, valorKit, etapa, prazo, obs: '' };
+    if (etapa === 'entregue') { const v = { id: uid(), data: prazo, canal: 'b2b', descricao: `${kits} kits — ${ocasiao}`, qtd: kits, valor: kits * valorKit, ref: empresa }; d.vendas.push(v); x.vendaId = v.id; }
+    d.empresas.push(x);
+  });
+  d.empresas.push({ id: 'e9', empresa: 'Imobiliária Exemplo', contato: 'Rafael', ocasiao: 'Fim de ano', kits: 30, valorKit: 280, etapa: 'perdido', prazo: '', obs: 'Orçamento de brindes já fechado com outro fornecedor' });
+  // clube
+  [['2027-07', 0, 16, 0], ['2027-08', 16, 15, 2]].forEach(([mes, anteriores, novos, cancelados]) => {
+    const ativos = anteriores + novos - cancelados;
+    const v = { id: uid(), data: mes + '-05', canal: 'clube', descricao: `Mensalidades do clube — ${mesLabel(mes)}`, qtd: ativos, valor: ativos * CFG.mensalidadeClube, ref: 'clube' };
+    d.vendas.push(v); d.clube.push({ id: uid(), mes, anteriores, novos, cancelados, ativos, vendaId: v.id });
+  });
+  // revenda
+  d.revendedoras.push({ id: 'r0', nome: 'Papelaria Encanto (exemplo)', tipo: 'Papelaria boutique', cidade: 'Niterói', contato: '(21) 90000-0000' });
+  d.revendedoras.push({ id: 'r1', nome: 'Bia Planner (exemplo)', tipo: 'Parceira do programa', cidade: 'São Paulo', contato: 'bia@exemplo.com' });
+  d.vendas.push({ id: uid(), data: '2027-08-12', canal: 'revenda', descricao: 'Pedido de revenda — R$ 1.000 em tabela (35%)', qtd: 1, valor: 650, revendedoraId: 'r0', ref: 'Papelaria Encanto (exemplo)' });
+  // lista VIP
+  const nomes = ['Camila (exemplo)', 'Letícia (exemplo)', 'Rodrigo (exemplo)', 'Paula (exemplo)', 'Helena (exemplo)', 'Vanessa (exemplo)', 'Priscila (exemplo)', 'Tatiana (exemplo)', 'Diego (exemplo)', 'Sofia (exemplo)'];
+  const ints = [['vanilla'], ['vanilla', 'parceira'], ['empresa', 'minimalista'], ['revenda'], ['vanilla'], ['minimalista'], ['vanilla', 'revenda'], ['parceira'], ['empresa'], ['vanilla']];
+  nomes.forEach((nome, i) => d.leads.push({ id: 'l' + i, nome, contato: i % 2 ? `contato${i}@exemplo.com` : `(21) 9${String(1000 + i * 37).padStart(4, '0')}-0000`, interesses: ints[i], origem: 'site', criadoEm: `2027-0${3 + (i % 2)}-${String(5 + i * 2).padStart(2, '0')}T12:00:00Z` }));
+  d.leadsStatus = { l2: '2027-04-02', l8: '2027-04-10' };
+  return d;
+}
+
+/* =========================================================
+   Início
+   ========================================================= */
+carregar();
+mesSel = mesPadrao();
+render();
+</script>
+</body>
+</html>
