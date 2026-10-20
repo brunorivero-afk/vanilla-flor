@@ -224,12 +224,14 @@ const ETAPAS = [
   { id: 'fechado',  nome: 'Fechado' },
   { id: 'entregue', nome: 'Entregue' }
 ];
-const INTERESSES = { vanilla: 'Linha Vanilla Flor', minimalista: 'VF Minimalista', empresa: 'Kits para empresa', parceira: 'Ser parceira', revenda: 'Revender' };
+const INTERESSES = { vanilla: 'Linha Vanilla Flor', minimalista: 'VF Minimalista', empresa: 'Kits para empresa', parceira: 'Ser influenciadora', consultora: 'Ser consultora', revenda: 'Revender', clube: 'Clube de assinatura' };
+const TIPOS_PARCEIRA = { influenciadora: 'Influenciadora', consultora: 'Consultora' };
+const tipoDe = p => p.tipo || 'influenciadora'; // registros antigos eram todos influenciadoras
 
 /* =========================================================
    Armazenamento (real × demonstração, nunca misturados)
    ========================================================= */
-const K = { real: 'vf_sistema_v1', demo: 'vf_sistema_demo_v1', leads: 'vf_leads_v1', modo: 'vf_modo_v1' };
+const K = { real: 'vf_sistema_v1', demo: 'vf_sistema_demo_v2', leads: 'vf_leads_v1', modo: 'vf_modo_v1' };
 const vazio = () => ({ vendas: [], empresas: [], parceiras: [], revendedoras: [], clube: [], leads: [], leadsStatus: {} });
 const ls = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (_) { return d; } },
@@ -321,7 +323,7 @@ const PAGINAS = [
   { id: 'parceiras', nome: 'Parceiras' }, { id: 'revenda', nome: 'Revenda' }, { id: 'clube', nome: 'Clube' },
   { id: 'leads', nome: 'Lista VIP' }, { id: 'ajustes', nome: 'Metas e ajustes' }
 ];
-let pagina = 'painel', mesSel = null, filtroCanal = 'todos', filtroInteresse = 'todos', mostrarPerdidas = false;
+let pagina = 'painel', mesSel = null, filtroCanal = 'todos', filtroInteresse = 'todos', filtroTipo = 'todos', mostrarPerdidas = false;
 
 function renderMenu() {
   const nLeads = leadsAtuais().length;
@@ -416,7 +418,7 @@ function pgPainel() {
   <div class="grid two section-gap">
     <div class="card"><h2>Parceiras que mais vendem <button class="btn small ghost" data-go="parceiras">Abrir</button></h2>
       ${ranking.length ? `<div class="table-wrap"><table><thead><tr><th>Parceira</th><th>Cupom</th><th class="num">Pedidos</th><th class="num">Receita</th><th class="num">Kit</th></tr></thead><tbody>
-      ${ranking.map(r => `<tr><td>${esc(r.p.nome)}</td><td><span class="chip">${esc(r.p.cupom)}</span></td><td class="num">${r.pedidos}</td><td class="num">${brl(r.receita)}</td><td class="num">${r.pedidos >= CFG.vendasPagamKit ? '<span class="pill-ok">pago</span>' : `<span class="pill-warn">faltam ${CFG.vendasPagamKit - r.pedidos}</span>`}</td></tr>`).join('')}
+      ${ranking.map(r => `<tr><td>${esc(r.p.nome)}</td><td><span class="chip">${esc(r.p.cupom)}</span></td><td class="num">${r.pedidos}</td><td class="num">${brl(r.receita)}</td><td class="num">${kitStatus(r.p, r.pedidos)}</td></tr>`).join('')}
       </tbody></table></div>` : '<p class="empty">Nenhuma parceira cadastrada.</p>'}</div>
     <div class="card"><h2>Lista VIP <button class="btn small ghost" data-go="leads">Abrir</button></h2>
       <div class="kpi"><div class="value">${nInt(leadsAtuais().length)}</div><div class="sub">pessoas na lista</div></div>
@@ -470,32 +472,41 @@ function pgEmpresas() {
     <p class="note">Processo do BP: lista de empresas → catálogo → amostra → proposta com validade → 50% de entrada → produção sob encomenda → entrega → pós-venda.</p></div>`;
 }
 
+function kitStatus(p, pedidos) {
+  if (tipoDe(p) === 'consultora') return '<span class="muted">sem kit</span>';
+  if (!p.kitEnviadoEm) return '<span class="muted">não enviado</span>';
+  return pedidos >= CFG.vendasPagamKit ? '<span class="pill-ok">kit pago</span>' : `<span class="pill-warn">faltam ${CFG.vendasPagamKit - pedidos}</span>`;
+}
 function pgParceiras() {
-  const linhas = db.parceiras.map(p => {
+  const todas = db.parceiras.map(p => {
     const vs = vendasDaParceira(p), pedidos = vs.reduce((a, v) => a + (+v.qtd || 0), 0), receita = vs.reduce((a, v) => a + (+v.valor || 0), 0);
     const comissao = receita * (p.comissao != null ? p.comissao / 100 : CFG.comissaoParceira);
-    const kit = !p.kitEnviadoEm ? '<span class="muted">não enviado</span>' : (pedidos >= CFG.vendasPagamKit ? '<span class="pill-ok">kit pago</span>' : `<span class="pill-warn">faltam ${CFG.vendasPagamKit - pedidos}</span>`);
-    return { p, pedidos, receita, comissao, kit };
+    return { p, pedidos, receita, comissao, kit: kitStatus(p, pedidos) };
   }).sort((a, b) => b.receita - a.receita);
-  const tot = linhas.reduce((a, l) => ({ pedidos: a.pedidos + l.pedidos, receita: a.receita + l.receita, comissao: a.comissao + l.comissao }), { pedidos: 0, receita: 0, comissao: 0 });
-  const kitsEnviados = db.parceiras.filter(p => p.kitEnviadoEm).length;
+  const linhas = filtroTipo === 'todos' ? todas : todas.filter(l => tipoDe(l.p) === filtroTipo);
+  const tot = todas.reduce((a, l) => ({ pedidos: a.pedidos + l.pedidos, receita: a.receita + l.receita, comissao: a.comissao + l.comissao }), { pedidos: 0, receita: 0, comissao: 0 });
+  const kitsEnviados = db.parceiras.filter(p => tipoDe(p) === 'influenciadora' && p.kitEnviadoEm).length;
   const totalLoja = db.vendas.filter(v => v.canal === 'loja').reduce((a, v) => a + (+v.valor || 0), 0);
+  const ativas = db.parceiras.filter(p => p.status !== 'inativa');
+  const nInf = ativas.filter(p => tipoDe(p) === 'influenciadora').length, nCons = ativas.length - nInf;
   return `
-  <div class="page-head"><div><h1>Parceiras</h1><p>Programa de influenciadoras: kit com o nome de cada uma, cupom e comissão por venda.</p></div>
-    <div class="head-actions"><button class="btn primary" data-act="nova-parceira">+ Nova parceira</button></div></div>
+  <div class="page-head"><div><h1>Parceiras</h1><p>Influenciadoras (kit com o nome dela) e consultoras (vendem para a própria rede), todas com cupom e comissão por venda.</p></div>
+    <div class="head-actions"><select class="pill" data-act="filtro-tipo"><option value="todos">Todos os tipos</option>${Object.keys(TIPOS_PARCEIRA).map(t => `<option value="${t}" ${filtroTipo === t ? 'selected' : ''}>${TIPOS_PARCEIRA[t]}s</option>`).join('')}</select>
+      <button class="btn primary" data-act="nova-parceira">+ Nova parceira</button></div></div>
   <div class="grid kpis">
-    <div class="card kpi"><div class="label">Parceiras ativas</div><div class="value">${db.parceiras.filter(p => p.status !== 'inativa').length}</div><div class="sub">${kitsEnviados} kits enviados · ${brl(kitsEnviados * CFG.custoKitParceira)}</div></div>
+    <div class="card kpi"><div class="label">Parceiras ativas</div><div class="value">${ativas.length}</div><div class="sub">${nInf} influenciadora${nInf === 1 ? '' : 's'} · ${nCons} consultora${nCons === 1 ? '' : 's'} · ${kitsEnviados} kits enviados (${brl(kitsEnviados * CFG.custoKitParceira)})</div></div>
     <div class="card kpi"><div class="label">Vendas com cupom</div><div class="value">${brl(tot.receita)}</div><div class="sub">${nInt(tot.pedidos)} pedidos</div></div>
     <div class="card kpi"><div class="label">Fatia das vendas da loja</div><div class="value">${totalLoja ? pct(tot.receita / totalLoja) : '–'}</div><div class="sub">meta do BP: 25%</div></div>
     <div class="card kpi"><div class="label">Comissões a pagar</div><div class="value">${brl(tot.comissao)}</div><div class="sub">10% sobre a venda com cupom</div></div>
   </div>
   <div class="card section-gap"><div class="table-wrap"><table>
-    <thead><tr><th>Parceira</th><th>Nicho</th><th>Cupom</th><th>Kit enviado</th><th class="num">Pedidos</th><th class="num">Receita</th><th class="num">Comissão</th><th>Kit</th><th></th></tr></thead>
+    <thead><tr><th>Parceira</th><th>Tipo</th><th>Perfil</th><th>Cupom</th><th>Kit enviado</th><th class="num">Pedidos</th><th class="num">Receita</th><th class="num">Comissão</th><th>Kit</th><th></th></tr></thead>
     <tbody>${linhas.length ? linhas.map(l => `<tr><td><b>${esc(l.p.nome)}</b><div class="muted">${esc(l.p.instagram || '')}${l.p.seguidores ? ' · ' + nInt(+l.p.seguidores) + ' seguidores' : ''}</div></td>
-      <td>${esc(l.p.nicho || '')}</td><td><span class="chip">${esc(l.p.cupom)}</span></td><td>${dataBR(l.p.kitEnviadoEm) || '–'}</td>
+      <td>${tipoDe(l.p) === 'consultora' ? '<span class="tag t-clube">Consultora</span>' : '<span class="tag t-loja">Influenciadora</span>'}</td>
+      <td>${esc(l.p.nicho || '')}</td><td><span class="chip">${esc(l.p.cupom)}</span></td><td>${tipoDe(l.p) === 'consultora' ? '–' : (dataBR(l.p.kitEnviadoEm) || '–')}</td>
       <td class="num">${l.pedidos}</td><td class="num">${brl(l.receita)}</td><td class="num">${brl(l.comissao)}</td><td>${l.kit}</td>
-      <td class="num"><button class="icon-btn" data-act="editar-parceira" data-id="${l.p.id}">✎</button><button class="icon-btn" data-act="excluir-parceira" data-id="${l.p.id}">✕</button></td></tr>`).join('') : '<tr><td colspan="9" class="empty">Cadastre a primeira parceira.</td></tr>'}</tbody>
-  </table></div><p class="note">Regra do BP: cerca de ${CFG.vendasPagamKit} vendas com cupom pagam o kit de R$ ${CFG.custoKitParceira}. A cada trimestre, fica quem vende; a melhor ganha uma coleção assinada (15%).</p></div>`;
+      <td class="num"><button class="icon-btn" data-act="editar-parceira" data-id="${l.p.id}">✎</button><button class="icon-btn" data-act="excluir-parceira" data-id="${l.p.id}">✕</button></td></tr>`).join('') : '<tr><td colspan="10" class="empty">Nenhuma parceira neste filtro.</td></tr>'}</tbody>
+  </table></div><p class="note">Influenciadoras: cerca de ${CFG.vendasPagamKit} vendas com cupom pagam o kit de R$ ${CFG.custoKitParceira}; a cada trimestre fica quem vende, e a melhor ganha uma coleção assinada (15%). Consultoras: não recebem kit; vendem para colegas, alunas e amigas com cupom próprio, sem estoque.</p></div>`;
 }
 
 function pgRevenda() {
@@ -654,16 +665,18 @@ function formEmpresa(x = {}) {
 }
 function formParceira(p = {}) {
   abrirForm(p.id ? 'Editar parceira' : 'Nova parceira', [
-    { name: 'nome', label: 'Nome', required: true }, { name: 'instagram', label: 'Instagram / TikTok', placeholder: '@perfil' },
-    { name: 'nicho', label: 'Nicho', type: 'select', options: ['Studygram', 'Bullet journal', 'Concursos', 'Organização e rotina', 'Papelaria', 'Produtividade / carreira', 'Professoras'].map(o => ({ value: o, label: o })) },
-    { name: 'seguidores', label: 'Seguidores', type: 'number', min: 0 },
+    { name: 'tipo', label: 'Tipo', type: 'select', full: true, options: Object.keys(TIPOS_PARCEIRA).map(t => ({ value: t, label: TIPOS_PARCEIRA[t] })), value: tipoDe(p) },
+    { name: 'nome', label: 'Nome', required: true }, { name: 'instagram', label: 'Instagram / TikTok / WhatsApp', placeholder: '@perfil ou telefone' },
+    { name: 'nicho', label: 'Perfil', type: 'select', options: ['Studygram', 'Bullet journal', 'Concursos', 'Organização e rotina', 'Papelaria', 'Produtividade / carreira', 'Professora', 'Estudante', 'Empreendedora'].map(o => ({ value: o, label: o })) },
+    { name: 'seguidores', label: 'Seguidores', type: 'number', min: 0, showIf: 'tipo=influenciadora' },
     { name: 'cupom', label: 'Cupom', required: true, placeholder: 'EX.: ANA10' }, { name: 'comissao', label: 'Comissão (%)', type: 'number', min: 0, step: '0.5', value: 10 },
-    { name: 'kitEnviadoEm', label: 'Kit enviado em', type: 'date' },
+    { name: 'kitEnviadoEm', label: 'Kit enviado em', type: 'date', showIf: 'tipo=influenciadora' },
     { name: 'status', label: 'Status', type: 'select', options: [{ value: 'ativa', label: 'Ativa' }, { value: 'inativa', label: 'Inativa' }] }
   ], p, d => {
     const cupom = d.cupom.trim().toUpperCase();
     if (db.parceiras.some(x => x.cupom.toUpperCase() === cupom && x.id !== p.id)) { toast('Esse cupom já é de outra parceira'); return false; }
     const reg = Object.assign({}, p, d, { id: p.id || uid(), cupom, seguidores: +d.seguidores || 0, comissao: d.comissao === '' ? 10 : +d.comissao });
+    if (reg.tipo === 'consultora') { reg.kitEnviadoEm = ''; reg.seguidores = 0; }
     if (p.id && p.cupom && p.cupom !== cupom) db.vendas.forEach(v => { if (v.cupom && v.cupom.toUpperCase() === p.cupom.toUpperCase()) v.cupom = cupom; });
     if (p.id) db.parceiras[db.parceiras.findIndex(x => x.id === p.id)] = reg; else db.parceiras.push(reg);
     toast('Parceira salva');
@@ -743,6 +756,7 @@ document.addEventListener('change', e => {
   if (a.dataset.act === 'mes') { mesSel = a.value; render(); }
   if (a.dataset.act === 'filtro-canal') { filtroCanal = a.value; render(); }
   if (a.dataset.act === 'filtro-interesse') { filtroInteresse = a.value; render(); }
+  if (a.dataset.act === 'filtro-tipo') { filtroTipo = a.value; render(); }
 });
 $('#openSide').addEventListener('click', () => $('#side').classList.toggle('open'));
 // se a lista VIP mudar em outra aba (página institucional), atualiza
@@ -767,7 +781,7 @@ function gerarDemo() {
     ['Rotina da Gabi (exemplo)', '@rotinadagabi.exemplo', 'Organização e rotina', 6700, 'GABI10'],
     ['Prof. Júlia (exemplo)', '@prof.julia.exemplo', 'Professoras', 12500, 'JULIA10']
   ];
-  parcs.forEach(([nome, instagram, nicho, seguidores, cupom], i) => d.parceiras.push({ id: 'p' + i, nome, instagram, nicho, seguidores, cupom, comissao: 10, kitEnviadoEm: '2027-04-1' + (i % 6), status: 'ativa' }));
+  parcs.forEach(([nome, instagram, nicho, seguidores, cupom], i) => d.parceiras.push({ id: 'p' + i, tipo: 'influenciadora', nome, instagram, nicho, seguidores, cupom, comissao: 10, kitEnviadoEm: '2027-04-1' + (i % 6), status: 'ativa' }));
   // loja: 4 semanas por mês + cupons
   const plano = { '2027-05': 69, '2027-06': 47, '2027-07': 46, '2027-08': 24 };
   Object.entries(plano).forEach(([m, total]) => {
@@ -785,6 +799,16 @@ function gerarDemo() {
       if (!q) return; resto -= q;
       d.vendas.push({ id: uid(), data: `${m}-${String(10 + i * 3).padStart(2, '0')}`, canal: 'loja', descricao: `Vendas com cupom ${p.cupom}`, qtd: q, valor: Math.round(q * (192 + rnd() * 18) * 100) / 100, cupom: p.cupom });
     });
+  });
+  // consultoras: vendem para a própria rede, sem kit
+  const cons = [
+    ['Cláudia, professora (exemplo)', '(21) 90000-1111', 'Professora', 'CLAUDIA10', [['2027-06-18', 3], ['2027-07-16', 4], ['2027-08-11', 2]]],
+    ['Letícia, universitária (exemplo)', '(21) 90000-2222', 'Estudante', 'LETI10', [['2027-07-22', 2], ['2027-08-14', 1]]],
+    ['Fernanda, empreendedora (exemplo)', '(21) 90000-3333', 'Empreendedora', 'FER10', [['2027-08-09', 1]]]
+  ];
+  cons.forEach(([nome, instagram, nicho, cupom, vendas], i) => {
+    d.parceiras.push({ id: 'c' + i, tipo: 'consultora', nome, instagram, nicho, seguidores: 0, cupom, comissao: 10, kitEnviadoEm: '', status: 'ativa' });
+    vendas.forEach(([data, q]) => d.vendas.push({ id: uid(), data, canal: 'loja', descricao: `Vendas com cupom ${cupom} (consultora)`, qtd: q, valor: Math.round(q * (198 + rnd() * 14) * 100) / 100, cupom }));
   });
   // B2B
   const emp = [
@@ -814,7 +838,7 @@ function gerarDemo() {
   d.vendas.push({ id: uid(), data: '2027-08-12', canal: 'revenda', descricao: 'Pedido de revenda — R$ 1.000 em tabela (35%)', qtd: 1, valor: 650, revendedoraId: 'r0', ref: 'Papelaria Encanto (exemplo)' });
   // lista VIP
   const nomes = ['Camila (exemplo)', 'Letícia (exemplo)', 'Rodrigo (exemplo)', 'Paula (exemplo)', 'Helena (exemplo)', 'Vanessa (exemplo)', 'Priscila (exemplo)', 'Tatiana (exemplo)', 'Diego (exemplo)', 'Sofia (exemplo)'];
-  const ints = [['vanilla'], ['vanilla', 'parceira'], ['empresa', 'minimalista'], ['revenda'], ['vanilla'], ['minimalista'], ['vanilla', 'revenda'], ['parceira'], ['empresa'], ['vanilla']];
+  const ints = [['vanilla', 'clube'], ['vanilla', 'parceira'], ['empresa', 'minimalista'], ['revenda'], ['vanilla', 'consultora'], ['minimalista', 'clube'], ['vanilla', 'revenda'], ['parceira'], ['empresa'], ['consultora', 'clube']];
   nomes.forEach((nome, i) => d.leads.push({ id: 'l' + i, nome, contato: i % 2 ? `contato${i}@exemplo.com` : `(21) 9${String(1000 + i * 37).padStart(4, '0')}-0000`, interesses: ints[i], origem: 'site', criadoEm: `2027-0${3 + (i % 2)}-${String(5 + i * 2).padStart(2, '0')}T12:00:00Z` }));
   d.leadsStatus = { l2: '2027-04-02', l8: '2027-04-10' };
   return d;

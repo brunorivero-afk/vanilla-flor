@@ -200,15 +200,37 @@
   /* ===== clube ===== */
   .club { padding: 0; }
   .club-box {
-    border-radius: 32px; padding: 64px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: center;
+    border-radius: 32px; padding: 64px;
     background: linear-gradient(120deg, var(--sage-soft), #f3efe4 55%, var(--rose-soft));
     border: 1px solid var(--line);
   }
+  .club-head { text-align: center; }
+  .club-head .lead { margin-inline: auto; }
   .club-box h2 { margin: 12px 0 16px; }
-  .club-box .months { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-  .club-box .months div { background: rgba(255,253,248,.8); border: 1px solid var(--line); border-radius: 16px; padding: 18px 12px; text-align: center; }
-  .club-box .months b { display: block; font-family: var(--script); font-weight: 400; color: var(--gold-deep); font-size: 28px; line-height: 1.1; }
+  .clubs { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 44px; }
+  .club-card { border-radius: 24px; padding: 34px 32px; }
+  .club-card h3 { font-size: 34px; margin: 8px 0 10px; }
+  .club-card p { font-size: 15.5px; margin-bottom: 22px; }
+  .club-card.soft { background: rgba(255,253,248,.85); border: 1px solid var(--line); }
+  .club-card.soft h3 { font-family: var(--script); font-weight: 400; color: var(--gold-deep); font-size: 46px; }
+  .club-card.soft p { color: var(--ink-soft); }
+  .club-card.dark { background: linear-gradient(160deg, #2f2926, #1f1b19); border: 1px solid #3a322e; color: #e9dfd2; }
+  .club-card.dark h3 { color: #f3eadf; letter-spacing: .06em; font-weight: 400; }
+  .club-card.dark .eyebrow { color: var(--fendi); }
+  .club-card.dark p { color: #cbbfb2; }
+  .club-box .months { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .club-box .months div { background: rgba(255,253,248,.8); border: 1px solid var(--line); border-radius: 16px; padding: 14px 8px; text-align: center; }
+  .club-box .months b { display: block; font-family: var(--script); font-weight: 400; color: var(--gold-deep); font-size: 26px; line-height: 1.1; }
   .club-box .months span { font-size: 12px; color: var(--ink-soft); letter-spacing: .06em; }
+  .club-card.dark .months div { background: rgba(255,255,255,.04); border-color: rgba(216,191,143,.25); }
+  .club-card.dark .months b { font-family: var(--serif); font-size: 21px; color: var(--gold-light); letter-spacing: .04em; }
+  .club-card.dark .months span { color: #a99d90; }
+  .club-perks { list-style: none; display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-top: 30px; }
+  .club-perks li { background: rgba(255,253,248,.7); border: 1px solid var(--line); border-radius: 18px; padding: 18px 16px; }
+  .club-perks b { display: block; font-family: var(--serif); font-size: 19px; font-weight: 600; margin-bottom: 4px; color: var(--ink); }
+  .club-perks span { font-size: 13.5px; color: var(--ink-soft); line-height: 1.55; display: block; }
+  .club-cta { text-align: center; margin-top: 34px; }
+  .center-lead { text-align: center; margin: 18px auto 0; }
 
   /* ===== empresas ===== */
   .biz { background: var(--onyx); color: #e9dfd2; margin-top: 110px; }
@@ -227,7 +249,11 @@
   .biz .note { margin-top: 16px; font-size: 13px; color: #9d9184; }
 
   /* ===== parceiras ===== */
-  .partners-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 60px; }
+  .partners-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 54px; }
+  .partners-grid .partner { padding: 40px 32px; display: flex; flex-direction: column; }
+  .partners-grid .partner .btn { margin-top: auto; align-self: flex-start; }
+  .partners-grid .partner dl { margin-bottom: 30px; }
+  .partners-grid .partner h3 { font-size: 30px; }
   .partner { background: var(--card); border: 1px solid var(--line); border-radius: 28px; padding: 46px 42px; }
   .partner h3 { font-size: 34px; margin: 10px 0 12px; }
   .partner p { color: var(--ink-soft); }
@@ -279,7 +305,9 @@
 
   /* ===== responsivo ===== */
   @media (max-width: 960px) {
-    .hero-grid, .lines-grid, .biz-grid, .vip-grid, .partners-grid, .club-box { grid-template-columns: 1fr; }
+    .hero-grid, .lines-grid, .biz-grid, .vip-grid, .partners-grid, .clubs { grid-template-columns: 1fr; }
+    .partners-grid { max-width: 560px; margin-inline: auto; }
+    .club-perks { grid-template-columns: 1fr 1fr; }
     .hero-art { max-width: 460px; margin: 10px auto 0; }
     .kits-grid { grid-template-columns: 1fr; max-width: 520px; margin-inline: auto; }
     .pillars { grid-template-columns: 1fr; gap: 40px; }
@@ -300,6 +328,8 @@
     .hero-art .tag.t1 { left: 0; }
     .hero-art .tag.t2 { right: 0; }
     .club-box .months { grid-template-columns: 1fr 1fr 1fr; }
+    .club-perks { grid-template-columns: 1fr; }
+    .club-card { padding: 28px 22px; }
   }
   @media (prefers-reduced-motion: reduce) {
     .js .reveal { opacity: 1; transform: none; transition: none; }
@@ -316,6 +346,7 @@
     <ul id="menu">
       <li><a href="#marca">A marca</a></li>
       <li><a href="#colecoes">Coleções</a></li>
+      <li><a href="#clube">Clube</a></li>
       <li><a href="#empresas">Para empresas</a></li>
       <li><a href="#parceiras">Parceiras</a></li>
     </ul>
@@ -500,17 +531,42 @@
   <!-- CLUBE -->
   <section class="club">
     <div class="wrap">
-      <div class="club-box reveal">
-        <div>
+      <div class="club-box reveal" id="clube">
+        <div class="club-head">
           <span class="eyebrow">Em breve · Julho 2027</span>
-          <h2>Clube <span class="script">Ritual do Mês</span></h2>
-          <p class="lead">Uma caixa por mês, com tema e paleta novos, frete incluso. Papelaria escolhida a dedo para renovar o seu ritual a cada estação.</p>
+          <h2>Os clubes <span class="script">Vanilla Flor</span></h2>
+          <p class="lead">Uma caixa por mês, com tema novo, frete incluso e uma carta da nossa fundadora contando a história de cada edição. Papelaria escolhida a dedo para renovar o seu ritual.</p>
         </div>
-        <div class="months" aria-hidden="true">
-          <div><b>Jardim</b><span>julho</span></div>
-          <div><b>Brisa</b><span>agosto</span></div>
-          <div><b>Florada</b><span>setembro</span></div>
+        <div class="clubs">
+          <article class="club-card soft">
+            <span class="eyebrow">Linha afetiva</span>
+            <h3>Ritual do Mês</h3>
+            <p>Para quem estuda, planeja e cuida de si: papelaria delicada, cores da estação e um pequeno ritual de autocuidado.</p>
+            <div class="months" aria-hidden="true">
+              <div><b>Jardim</b><span>julho</span></div>
+              <div><b>Brisa</b><span>agosto</span></div>
+              <div><b>Florada</b><span>setembro</span></div>
+            </div>
+          </article>
+          <article class="club-card dark">
+            <span class="eyebrow">Linha executiva</span>
+            <h3>VF Minimalista</h3>
+            <p>Para executivas e empreendedoras: escrita fina, organização da mesa e ferramentas para planejar a semana com clareza.</p>
+            <div class="months" aria-hidden="true">
+              <div><b>Foco</b><span>julho</span></div>
+              <div><b>Clareza</b><span>agosto</span></div>
+              <div><b>Ritmo</b><span>setembro</span></div>
+            </div>
+          </article>
         </div>
+        <ul class="club-perks">
+          <li><b>Curadoria com carta</b><span>Cada caixa chega com uma carta escrita pela fundadora sobre o tema do mês.</span></li>
+          <li><b>Acesso antecipado</b><span>Assinantes compram as coleções novas antes de todo mundo.</span></li>
+          <li><b>Itens exclusivos</b><span>Peças que só existem dentro do clube, numeradas.</span></li>
+          <li><b>Plano anual e presente</b><span>Assinatura anual com vantagem, ou de presente para alguém especial.</span></li>
+          <li><b>Comunidade</b><span>Grupo fechado, desafio de planejamento do mês e live de abertura da caixa.</span></li>
+        </ul>
+        <div class="club-cta"><a href="#lista-vip" class="btn btn-gold" data-interest="clube">Quero saber do clube primeiro</a></div>
       </div>
     </div>
   </section>
@@ -540,10 +596,11 @@
         <span class="eyebrow">Crescer junto</span>
         <h2>Para quem quer fazer <span class="script">parte</span></h2>
       </div>
+      <p class="lead center-lead reveal">Três jeitos de caminhar com a Vanilla Flor: indicando para a sua comunidade, vendendo para a sua rede ou levando a marca para a sua loja.</p>
       <div class="partners-grid">
         <article class="partner reveal">
           <span class="eyebrow">Criadoras de conteúdo</span>
-          <h3>Seja parceira</h3>
+          <h3>Influenciadora parceira</h3>
           <p>Para quem fala de estudos, organização, rotina e papelaria, e tem uma comunidade que confia nas suas indicações.</p>
           <dl>
             <div><dt>Um kit com o seu nome</dt><dd>Montamos juntas um kit com a sua paleta e os seus favoritos. Ele vira produto na loja.</dd></div>
@@ -553,9 +610,20 @@
           <a href="#lista-vip" class="btn btn-ghost" data-interest="parceira">Quero ser parceira</a>
         </article>
         <article class="partner reveal">
-          <span class="eyebrow">Lojas e empreendedoras</span>
-          <h3>Revenda Vanilla Flor</h3>
-          <p>Para papelarias boutique, lojas de presente e empreendedoras que vendem para a própria rede.</p>
+          <span class="eyebrow">Professoras, estudantes, empreendedoras</span>
+          <h3>Consultora Vanilla Flor</h3>
+          <p>Para quem ama papelaria e tem uma rede de colegas, alunas e amigas que pedem indicação. Não precisa ser influenciadora.</p>
+          <dl>
+            <div><dt>Sem estoque e sem investimento</dt><dd>Você indica, a gente vende e entrega com toda a experiência da caixa.</dd></div>
+            <div><dt>Seu cupom, sua comissão</dt><dd>Cada compra feita com o seu cupom rende comissão para você, todo mês.</dd></div>
+            <div><dt>Feito para a sua rotina</dt><dd>Na sala dos professores, na faculdade ou no grupo das amigas: vende no seu tempo.</dd></div>
+          </dl>
+          <a href="#lista-vip" class="btn btn-ghost" data-interest="consultora">Quero ser consultora</a>
+        </article>
+        <article class="partner reveal">
+          <span class="eyebrow">Lojas e ateliês</span>
+          <h3>Revenda</h3>
+          <p>Para papelarias boutique, lojas de presente e empreendedoras que querem ter os kits Vanilla Flor no próprio estoque.</p>
           <div class="tiers"><span>a partir de R$ 500 · <b>30%</b></span><span>R$ 1.000 · <b>35%</b></span><span>R$ 2.000 · <b>40%</b></span></div>
           <dl>
             <div><dt>Kits prontos para vender</dt><dd>Coleções coordenadas, com embalagem que já encanta na vitrine.</dd></div>
@@ -591,7 +659,9 @@
               <label><input type="checkbox" name="interesse" value="minimalista"><span>VF Minimalista</span></label>
               <label><input type="checkbox" name="interesse" value="empresa"><span>Kits para empresa</span></label>
               <label><input type="checkbox" name="interesse" value="parceira"><span>Ser parceira</span></label>
+              <label><input type="checkbox" name="interesse" value="consultora"><span>Ser consultora</span></label>
               <label><input type="checkbox" name="interesse" value="revenda"><span>Revender</span></label>
+              <label><input type="checkbox" name="interesse" value="clube"><span>Clube de assinatura</span></label>
             </div>
           </div>
           <button type="submit" class="btn btn-gold">Quero entrar na lista</button>
@@ -611,7 +681,7 @@
     <div class="brand">Vanilla Flor</div>
     <div class="tag">Papelaria afetiva &amp; estética</div>
     <nav>
-      <a href="#marca">A marca</a><a href="#colecoes">Coleções</a><a href="#empresas">Para empresas</a><a href="#parceiras">Parceiras e revenda</a><a href="#lista-vip">Lista VIP</a>
+      <a href="#marca">A marca</a><a href="#colecoes">Coleções</a><a href="#clube">Clube</a><a href="#empresas">Para empresas</a><a href="#parceiras">Parceiras e revenda</a><a href="#lista-vip">Lista VIP</a>
     </nav>
     <p class="copy">© 2026 Vanilla Flor · Instagram e loja online em breve · <a href="sistema.html">Área interna</a></p>
   </div>
