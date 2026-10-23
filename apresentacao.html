@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vanilla Flor — Apresentação</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="assets/icon-64.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500&family=Pinyon+Script&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f8f3e8; --paper-2: #f2eadb; --card: #fffdf8; --line: #e6dccb;
+    --ink: #4a3b33; --ink-soft: #7a6a60; --gold: #b08d57; --gold-deep: #8f6e3e; --gold-light: #d8bf8f;
+    --rose: #c98f93; --rose-soft: #f1dedd; --sage: #9aae93; --sage-soft: #e3eadf; --lilac: #b6a6cc; --lilac-soft: #ece6f4;
+    --fendi: #c9b8a3; --onyx: #2b2522;
+    --script: 'Pinyon Script', cursive; --serif: 'Cormorant Garamond', Georgia, serif; --sans: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #1d1916; overflow: hidden; }
+  body { font-family: var(--sans); font-weight: 300; color: var(--ink); -webkit-font-smoothing: antialiased; cursor: default; }
+
+  /* palco fixo 1920×1080, escalado para a tela */
+  #stage { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; overflow: hidden;
+    background: var(--paper); }
+  #stage::before { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      radial-gradient(circle at 12% 18%, rgba(176,141,87,.38) 0 1.4px, transparent 2px),
+      radial-gradient(circle at 78% 64%, rgba(176,141,87,.3) 0 1.4px, transparent 2px),
+      radial-gradient(circle at 44% 82%, rgba(176,141,87,.24) 0 1.6px, transparent 2.2px),
+      radial-gradient(circle at 90% 12%, rgba(176,141,87,.28) 0 1.4px, transparent 2px);
+    background-size: 460px 460px, 560px 560px, 520px 520px, 620px 620px; }
+
+  .slide { position: absolute; inset: 0; padding: 110px 150px; display: flex; flex-direction: column; justify-content: center; z-index: 1;
+    opacity: 0; visibility: hidden; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease, visibility 0s .7s; }
+  .slide.on { opacity: 1; visibility: visible; transform: none; transition: opacity .7s ease, transform .7s ease, visibility 0s; }
+  .slide.dark { background: linear-gradient(160deg, #2f2926, #1f1b19); color: #e9dfd2; }
+  .slide.blush { background: linear-gradient(120deg, var(--sage-soft), #f3efe4 55%, var(--rose-soft)); }
+
+  .eyebrow { font-family: var(--sans); font-weight: 400; font-size: 24px; letter-spacing: .32em; text-transform: uppercase; color: var(--rose); }
+  .dark .eyebrow { color: var(--fendi); }
+  h1, h2, h3 { font-family: var(--serif); font-weight: 500; line-height: 1.08; color: var(--ink); }
+  .dark h1, .dark h2, .dark h3 { color: #f6eee3; }
+  h2 { font-size: 96px; margin: 22px 0 0; }
+  h2 em { font-style: italic; color: var(--gold-deep); }
+  .script { font-family: var(--script); font-weight: 400; color: var(--gold); }
+  .dark .script { color: var(--gold-light); }
+  .lead { font-size: 36px; line-height: 1.5; color: var(--ink-soft); max-width: 1300px; margin-top: 30px; }
+  .dark .lead { color: #cbbfb2; }
+  .center { text-align: center; align-items: center; }
+  .center .lead { margin-left: auto; margin-right: auto; }
+
+  /* 1 · capa */
+  .cover { flex-direction: row; align-items: center; gap: 80px; }
+  .cover .art { flex: none; width: 760px; height: 780px; border-radius: 999px 999px 40px 40px; overflow: hidden; position: relative;
+    background: radial-gradient(ellipse at 50% 40%, #fffaf0 0%, var(--paper-2) 70%); border: 1.5px solid var(--line);
+    box-shadow: 0 60px 120px -70px rgba(74,59,51,.55); }
+  .cover .art img { position: absolute; left: 50%; top: 50%; width: 178%; max-width: none; transform: translate(-50%, -49%); mix-blend-mode: multiply; }
+  .cover h1 { font-family: var(--script); font-weight: 400; font-size: 180px; color: var(--gold-deep); line-height: .9; }
+  .cover .tag { font-size: 26px; letter-spacing: .32em; text-transform: uppercase; color: var(--rose); margin-top: 26px; }
+  .cover .invite { font-family: var(--serif); font-style: italic; font-size: 54px; line-height: 1.3; margin-top: 70px; color: var(--ink); max-width: 820px; }
+  .cover .invite b { font-weight: 600; font-style: normal; color: var(--gold-deep); }
+
+  /* 2 · sonho */
+  .pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 50px; margin-top: 90px; }
+  .pillar { text-align: center; }
+  .pillar .ico { width: 120px; height: 120px; margin: 0 auto 30px; border-radius: 50%; display: grid; place-items: center; border: 1.5px solid var(--gold-light); color: var(--gold-deep); }
+  .pillar .ico svg { width: 54px; height: 54px; }
+  .pillar h3 { font-size: 48px; margin-bottom: 14px; }
+  .pillar p { font-size: 28px; line-height: 1.5; color: var(--ink-soft); }
+
+  /* 3 · duas linhas */
+  .lines { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; margin-top: 64px; }
+  .line { border-radius: 40px; padding: 64px 60px; min-height: 520px; position: relative; overflow: hidden; }
+  .line h3 { font-size: 76px; margin: 18px 0 20px; }
+  .line p { font-size: 30px; line-height: 1.5; }
+  .line .dots { display: flex; gap: 16px; margin-top: 46px; }
+  .line .dots i { width: 48px; height: 48px; border-radius: 50%; border: 3px solid rgba(255,255,255,.7); }
+  .line.floral { background: linear-gradient(160deg, #fdf3ef, #f6e6e3 45%, #efe3ef); border: 1.5px solid #ecd9d6; }
+  .line.floral h3 { font-family: var(--script); font-weight: 400; color: var(--gold-deep); font-size: 104px; }
+  .line.floral p { color: var(--ink-soft); }
+  .line.mini { background: linear-gradient(160deg, #2f2926, #1f1b19); color: #e9dfd2; }
+  .line.mini h3 { color: #f3eadf; letter-spacing: .06em; font-weight: 400; }
+  .line.mini .eyebrow { color: var(--fendi); }
+  .line.mini p { color: #cbbfb2; }
+  .line.mini .mono { position: absolute; right: 60px; top: 56px; width: 150px; height: 150px; border-radius: 50%; border: 1.5px solid rgba(216,191,143,.55);
+    display: grid; place-items: center; font-family: var(--serif); font-size: 60px; color: var(--gold-light); }
+
+  /* 4 · site */
+  .site-box { display: flex; gap: 80px; align-items: center; margin-top: 44px; }
+  .phone { flex: none; width: 380px; height: 680px; border-radius: 60px; background: var(--onyx); padding: 20px; box-shadow: 0 60px 120px -60px rgba(0,0,0,.6); }
+  .phone .screen { width: 100%; height: 100%; border-radius: 44px; overflow: hidden; background: var(--paper); position: relative; }
+  .phone .screen .mini-brand { font-family: var(--script); color: var(--gold); font-size: 40px; padding: 30px 30px 0; }
+  .phone .screen .mini-h { font-family: var(--serif); font-size: 50px; line-height: 1.05; padding: 40px 30px 0; }
+  .phone .screen .mini-h em { color: var(--gold-deep); }
+  .phone .screen .mini-img { margin: 30px 26px 0; height: 250px; border-radius: 200px 200px 22px 22px; overflow: hidden; position: relative; background: var(--paper-2); }
+  .phone .screen .mini-img img { position: absolute; left: 50%; top: 50%; width: 190%; max-width: none; transform: translate(-50%, -49%); mix-blend-mode: multiply; }
+  .phone .screen .mini-btn { margin: 30px; padding: 18px; border-radius: 999px; text-align: center; color: #fff; font-size: 18px; letter-spacing: .14em; text-transform: uppercase;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold) 55%, var(--gold-deep)); }
+  .site-list { list-style: none; display: grid; gap: 26px; font-size: 34px; }
+  .site-list li { display: flex; gap: 22px; align-items: baseline; }
+  .site-list li::before { content: '✦'; color: var(--gold); font-size: 24px; }
+  .url { display: inline-block; margin-top: 46px; font-size: 30px; padding: 22px 40px; border-radius: 999px; border: 1.5px solid var(--gold); color: var(--gold-deep); text-decoration: none; letter-spacing: .02em; }
+  .url:hover { background: rgba(176,141,87,.08); }
+
+  /* 5 · canais */
+  .channels { display: grid; grid-template-columns: repeat(5, 1fr); gap: 28px; margin-top: 80px; }
+  .ch { background: var(--card); border: 1.5px solid var(--line); border-radius: 32px; padding: 44px 32px; text-align: center; }
+  .ch .ico { width: 96px; height: 96px; margin: 0 auto 26px; border-radius: 50%; display: grid; place-items: center; }
+  .ch .ico svg { width: 46px; height: 46px; }
+  .ch h3 { font-size: 40px; margin-bottom: 14px; }
+  .ch p { font-size: 24px; line-height: 1.45; color: var(--ink-soft); }
+  .ch .when { margin-top: 22px; font-size: 18px; letter-spacing: .18em; text-transform: uppercase; color: var(--gold-deep); }
+  .note-line { margin-top: 56px; font-size: 28px; color: var(--ink-soft); text-align: center; }
+  .note-line b { color: var(--ink); font-weight: 500; }
+
+  /* 6 · clube */
+  .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px; margin-top: 70px; align-items: stretch; }
+  .plan { border-radius: 36px; padding: 50px 46px; background: rgba(255,253,248,.92); border: 1.5px solid var(--line); position: relative; display: flex; flex-direction: column; }
+  .plan h3 { font-size: 52px; margin: 12px 0 18px; }
+  .plan .price { font-family: var(--serif); font-size: 76px; font-weight: 600; color: var(--gold-deep); line-height: 1; }
+  .plan .per { font-size: 22px; color: var(--ink-soft); margin-top: 10px; }
+  .plan p { font-size: 26px; line-height: 1.5; color: var(--ink-soft); margin-top: 26px; }
+  .plan.star { border: 2.5px solid var(--gold-light); transform: translateY(-16px); box-shadow: 0 50px 100px -60px rgba(143,110,62,.6); }
+  .plan.star h3 { font-family: var(--script); font-weight: 400; color: var(--gold-deep); font-size: 78px; }
+  .plan .badge { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 18px; letter-spacing: .2em; text-transform: uppercase; color: #fff;
+    padding: 10px 24px; border-radius: 999px; background: linear-gradient(135deg, var(--gold-light), var(--gold) 60%, var(--gold-deep)); }
+  .plan.vf { background: linear-gradient(160deg, #2f2926, #1f1b19); border-color: #3a322e; }
+  .plan.vf h3 { color: #f3eadf; font-weight: 400; letter-spacing: .05em; }
+  .plan.vf .eyebrow { color: var(--fendi); }
+  .plan.vf .price { color: var(--gold-light); }
+  .plan.vf .per, .plan.vf p { color: #b9ad9f; }
+  .plan.circle { background: linear-gradient(170deg, #f7f3fb, #fffdf8); border-color: #e4dcef; }
+  .plan.circle .eyebrow { color: #8b7aab; }
+  .question { margin-top: 56px; text-align: center; font-family: var(--serif); font-style: italic; font-size: 44px; color: var(--gold-deep); }
+
+  /* 7 · números */
+  .numbers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 34px; margin-top: 80px; }
+  .num { border-top: 3px solid var(--gold-light); padding-top: 34px; }
+  .num b { display: block; font-family: var(--serif); font-size: 104px; font-weight: 600; line-height: 1; color: var(--gold-deep); }
+  .num span { display: block; font-size: 30px; line-height: 1.4; margin-top: 20px; color: var(--ink); }
+  .num small { display: block; font-size: 22px; color: var(--ink-soft); margin-top: 10px; }
+  .fine { margin-top: 70px; font-size: 24px; color: var(--ink-soft); line-height: 1.6; max-width: 1500px; }
+
+  /* 8 · linha do tempo */
+  .timeline { position: relative; display: grid; grid-template-columns: repeat(7, 1fr); margin-top: 110px; }
+  .timeline::before { content: ''; position: absolute; left: 4%; right: 4%; top: 42px; height: 3px; background: linear-gradient(90deg, var(--gold-light), var(--gold), var(--rose)); }
+  .tl { text-align: center; position: relative; padding: 0 10px; }
+  .tl .dot { width: 86px; height: 86px; margin: 0 auto 28px; border-radius: 50%; background: var(--card); border: 3px solid var(--gold); display: grid; place-items: center;
+    font-family: var(--serif); font-size: 28px; font-weight: 600; color: var(--gold-deep); position: relative; z-index: 1; }
+  .tl.now .dot { background: var(--gold); color: #fff; box-shadow: 0 0 0 12px rgba(176,141,87,.18); }
+  .tl h3 { font-size: 36px; margin-bottom: 10px; }
+  .tl p { font-size: 22px; line-height: 1.45; color: var(--ink-soft); }
+
+  /* 9 · papel dela */
+  .roles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-top: 76px; }
+  .role { background: var(--card); border: 1.5px solid var(--line); border-radius: 36px; padding: 54px 48px; }
+  .role .n { font-family: var(--script); font-size: 90px; color: var(--gold); line-height: .8; }
+  .role h3 { font-size: 50px; margin: 24px 0 18px; }
+  .role p { font-size: 27px; line-height: 1.5; color: var(--ink-soft); }
+  .role .ask { margin-top: 28px; font-family: var(--serif); font-style: italic; font-size: 30px; color: var(--gold-deep); }
+
+  /* 10 · decidir */
+  .decisions { list-style: none; counter-reset: d; display: grid; gap: 18px; margin-top: 44px; max-width: 1500px; }
+  .decisions li { counter-increment: d; display: grid; grid-template-columns: 70px 1fr; align-items: center; gap: 26px; font-size: 36px; line-height: 1.2; font-family: var(--serif); color: var(--ink);
+    background: rgba(255,253,248,.8); border: 1.5px solid var(--line); border-radius: 24px; padding: 16px 30px; cursor: pointer; transition: background .3s, border-color .3s; }
+  .decisions li::before { content: counter(d); width: 62px; height: 62px; border-radius: 50%; display: grid; place-items: center; font-family: var(--serif); font-size: 36px; font-weight: 600;
+    color: var(--gold-deep); border: 2px solid var(--gold-light); }
+  .decisions li small { display: block; font-family: var(--sans); font-size: 21px; color: var(--ink-soft); margin-top: 4px; }
+  .decisions li.done { background: var(--sage-soft); border-color: #cbd9c4; }
+  .decisions li.done::before { content: '✓'; background: var(--sage); color: #fff; border-color: var(--sage); }
+
+  /* 11 · próximos passos */
+  .steps { display: grid; grid-template-columns: 1fr 1fr; gap: 22px 44px; margin-top: 64px; }
+  .step { display: flex; align-items: center; gap: 26px; font-size: 32px; padding: 24px 30px; border-radius: 24px; background: rgba(255,253,248,.8); border: 1.5px solid var(--line); }
+  .step span.t { flex: 1; line-height: 1.35; }
+  .owner { flex: none; min-width: 170px; text-align: center; font-size: 22px; letter-spacing: .1em; text-transform: uppercase; padding: 12px 18px; border-radius: 999px;
+    border: 1.5px dashed var(--gold-light); color: var(--gold-deep); cursor: pointer; user-select: none; background: transparent; font-family: var(--sans); }
+  .owner.renata { background: var(--rose-soft); border: 1.5px solid var(--rose); color: #9c5f63; }
+  .owner.bruno { background: #ece7e3; border: 1.5px solid #8a7d74; color: #3d3430; }
+  .owner.juntos { background: var(--sage-soft); border: 1.5px solid var(--sage); color: #5f7a59; }
+  .hint { margin-top: 34px; font-size: 22px; color: var(--ink-soft); text-align: center; }
+
+  /* 12 · fechamento */
+  .end h2 { font-size: 120px; }
+  .end .script.big { font-size: 220px; line-height: .9; color: var(--gold-deep); }
+
+  /* controles */
+  #bar { position: fixed; left: 0; right: 0; bottom: 0; height: 64px; display: flex; align-items: center; justify-content: center; gap: 18px; z-index: 10;
+    background: linear-gradient(transparent, rgba(0,0,0,.35)); opacity: 0; transition: opacity .4s; }
+  body.show-ui #bar { opacity: 1; }
+  #bar button { background: rgba(255,253,248,.92); border: 0; border-radius: 999px; height: 40px; min-width: 40px; padding: 0 16px; cursor: pointer; font: 500 15px var(--sans); color: var(--ink); }
+  #bar .count { color: #fff; font: 400 15px var(--sans); min-width: 70px; text-align: center; letter-spacing: .08em; }
+  #progress { position: fixed; left: 0; top: 0; height: 4px; background: linear-gradient(90deg, var(--gold-light), var(--gold)); z-index: 10; transition: width .6s ease; }
+  body.hide-cursor { cursor: none; }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div id="stage">
+
+  <!-- 1 · Capa -->
+  <section class="slide cover">
+    <div class="art"><img src="assets/logo.jpg" alt="Logotipo Vanilla Flor"></div>
+    <div>
+      <h1>Vanilla Flor</h1>
+      <div class="tag">Papelaria afetiva &amp; estética</div>
+      <p class="invite">Um projeto para fazermos juntos.<br>E ele começa com <b>você</b>.</p>
+    </div>
+  </section>
+
+  <!-- 2 · O sonho -->
+  <section class="slide center">
+    <span class="eyebrow">O sonho</span>
+    <h2>Planejar pode ser um <em>ritual</em>.</h2>
+    <p class="lead">Mais do que vender cadernos: criar um momento de cuidado na rotina de quem estuda, ensina, trabalha e sonha.</p>
+    <div class="pillars">
+      <div class="pillar"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M5 3h10l4 4v14H5z"/><path d="M15 3v4h4M8 11h8M8 15h8M8 19h5"/></svg></div><h3>Papel que respeita a tinta</h3><p>100 a 120 g, sem sangramento, para todas as canetas.</p></div>
+      <div class="pillar"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="3"/><path d="M12 3c1.5 2.5 1.5 4.5 0 6-1.5-1.5-1.5-3.5 0-6zM12 15c1.5 1.5 1.5 3.5 0 6-1.5-2.5-1.5-4.5 0-6zM3 12c2.5-1.5 4.5-1.5 6 0-1.5 1.5-3.5 1.5-6 0zM15 12c1.5-1.5 3.5-1.5 6 0-2.5 1.5-4.5 1.5-6 0z"/></svg></div><h3>Design atemporal</h3><p>Kits que já chegam combinando, por paleta e por propósito.</p></div>
+      <div class="pillar"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M3 9h18v12H3zM2 5h20v4H2zM12 5v16"/><path d="M12 5c-2-3-6-3-6 0M12 5c2-3 6-3 6 0"/></svg></div><h3>Abrir devagar</h3><p>Seda, lacre, perfume de baunilha e um cartão escrito à mão.</p></div>
+    </div>
+  </section>
+
+  <!-- 3 · Duas linhas -->
+  <section class="slide">
+    <span class="eyebrow">A marca</span>
+    <h2>Duas linhas, uma mesma <span class="script">delicadeza</span></h2>
+    <div class="lines">
+      <div class="line floral">
+        <span class="eyebrow">Afetiva</span>
+        <h3>Vanilla Flor</h3>
+        <p>Para quem estuda, planeja e cuida de si: tons suaves, ilustrações sutis, emoção em primeiro lugar.</p>
+        <div class="dots"><i style="background:#f1dedd"></i><i style="background:#c98f93"></i><i style="background:#b6a6cc"></i><i style="background:#a9c4dc"></i><i style="background:#9aae93"></i><i style="background:#d8bf8f"></i></div>
+      </div>
+      <div class="line mini">
+        <div class="mono">VF</div>
+        <span class="eyebrow">Executiva</span>
+        <h3>VF Minimalista</h3>
+        <p>Para executivas, empreendedoras e empresas: monograma, materiais nobres, linhas limpas.</p>
+        <div class="dots"><i style="background:#c9b8a3"></i><i style="background:#1f1b19"></i><i style="background:#b5694d"></i><i style="background:#efe6d6"></i></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · O site -->
+  <section class="slide">
+    <span class="eyebrow">A vitrine já existe</span>
+    <h2>Vamos ver o <em>site</em>?</h2>
+    <div class="site-box">
+      <div class="phone"><div class="screen">
+        <div class="mini-brand">Vanilla Flor</div>
+        <div class="mini-h">Planejar pode ser um <em>ritual</em>.</div>
+        <div class="mini-img"><img src="assets/logo.jpg" alt=""></div>
+        <div class="mini-btn">Entrar na lista VIP</div>
+      </div></div>
+      <div>
+        <ul class="site-list">
+          <li>A marca, as duas linhas e os kits</li>
+          <li>A experiência de abrir a caixa</li>
+          <li>Os clubes de assinatura</li>
+          <li>Kits para empresas</li>
+          <li>Parceiras, consultoras e revenda</li>
+          <li>A lista VIP, já recebendo interessadas</li>
+        </ul>
+        <a class="url" href="index.html" target="_blank" rel="noopener">brunorivero-afk.github.io/vanilla-flor ↗</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · Como o dinheiro entra -->
+  <section class="slide">
+    <span class="eyebrow">O modelo</span>
+    <h2>Como o dinheiro <em>entra</em></h2>
+    <div class="channels">
+      <div class="ch"><div class="ico" style="background:var(--rose-soft);color:#a5666b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M6 2l-2 4v14a2 2 0 002 2h12a2 2 0 002-2V6l-2-4z"/><path d="M4 6h16M16 10a4 4 0 01-8 0"/></svg></div><h3>Loja online</h3><p>Kits e produtos na Nuvemshop, com entrega para todo o Brasil.</p><div class="when">Maio/27</div></div>
+      <div class="ch"><div class="ico" style="background:#ece7e3;color:#3d3430"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M10 21v-3h4v3"/></svg></div><h3>Empresas</h3><p>Kits com o logo da empresa para presentes e boas-vindas.</p><div class="when">Maio/27</div></div>
+      <div class="ch"><div class="ico" style="background:var(--sage-soft);color:#5f7a59"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 9h18v12H3zM2 5h20v4H2zM12 5v16"/><path d="M12 5c-2-3-6-3-6 0M12 5c2-3 6-3 6 0"/></svg></div><h3>Clubes</h3><p>Assinatura de vantagens e caixa surpresa todo mês.</p><div class="when">Jun–Out/27</div></div>
+      <div class="ch"><div class="ico" style="background:#f5ecdc;color:var(--gold-deep)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 9l1.5-5h15L21 9M3 9h18v11H3zM3 9a3 3 0 006 0 3 3 0 006 0 3 3 0 006 0"/></svg></div><h3>Revenda</h3><p>Papelarias boutique e lojas de presente com desconto.</p><div class="when">Ago/27</div></div>
+      <div class="ch"><div class="ico" style="background:var(--lilac-soft);color:#6f5d8f"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 21s-7-4.4-9.3-9A5.4 5.4 0 0112 6a5.4 5.4 0 019.3 6c-2.3 4.6-9.3 9-9.3 9z"/></svg></div><h3>Parceiras</h3><p>Influenciadoras e consultoras vendendo com cupom.</p><div class="when">Maio/27</div></div>
+    </div>
+    <p class="note-line">Vários caminhos ao mesmo tempo: <b>nenhum canal sozinho segura ou derruba o negócio.</b></p>
+  </section>
+
+  <!-- 6 · Clube -->
+  <section class="slide blush">
+    <span class="eyebrow">O coração da recorrência</span>
+    <h2>Os clubes <span class="script">Vanilla Flor</span></h2>
+    <div class="plans">
+      <div class="plan circle"><span class="eyebrow">Só vantagens</span><h3>Círculo</h3><div class="price">R$ 19,90</div><div class="per">por mês</div><p>Desconto, frete grátis, lançamentos antes de todo mundo e comunidade.</p></div>
+      <div class="plan star"><span class="badge">Uma caixa por mês</span><span class="eyebrow">Caixa surpresa + vantagens</span><h3>Ritual do Mês</h3><div class="price">R$ 119</div><div class="per">por mês · R$ 109 para as 100 primeiras</div><p>Tema novo todo mês, peça exclusiva numerada e uma carta da fundadora.</p></div>
+      <div class="plan vf"><span class="eyebrow">Uma caixa por estação</span><h3>VF Minimalista</h3><div class="price">R$ 249</div><div class="per">por trimestre</div><p>Escrita fina e organização para executivas, e para empresas presentearem.</p></div>
+    </div>
+    <p class="question">E se a carta de cada caixa fosse sua?</p>
+  </section>
+
+  <!-- 7 · Números -->
+  <section class="slide">
+    <span class="eyebrow">Os números que importam</span>
+    <h2>Pé no chão, e <em>coração</em> no projeto</h2>
+    <div class="numbers">
+      <div class="num"><b>R$ 30 mil</b><span>de investimento inicial</span><small>a verba entra em março de 2027</small></div>
+      <div class="num"><b>Maio</b><span>a loja abre, com o Dia das Mães</span><small>preparação sem gastar até lá</small></div>
+      <div class="num"><b>R$ 3 mil</b><span>de pró-labore por mês</span><small>a partir de junho de 2027</small></div>
+      <div class="num"><b>R$ 63 mil</b><span>de resultado no 1º ano</span><small>depois de pagar o pró-labore</small></div>
+    </div>
+    <p class="fine">Cenário base, de março de 2027 a fevereiro de 2028. No cenário cauteloso (30% menos vendas), o ano ainda fecha positivo, com cerca de R$ 28 mil. Tudo detalhado no plano de negócios e na planilha.</p>
+  </section>
+
+  <!-- 8 · Linha do tempo -->
+  <section class="slide">
+    <span class="eyebrow">O caminho</span>
+    <h2>Do primeiro post ao <em>primeiro Natal</em></h2>
+    <div class="timeline">
+      <div class="tl now"><div class="dot">✦</div><h3>Agora</h3><p>Instagram, lista VIP e conversas, sem gastar</p></div>
+      <div class="tl"><div class="dot">mar</div><h3>Verba</h3><p>Estoque, embalagens, fotos e loja</p></div>
+      <div class="tl"><div class="dot">mai</div><h3>Loja aberta</h3><p>Lançamento no Dia das Mães</p></div>
+      <div class="tl"><div class="dot">jun</div><h3>Círculo</h3><p>Clube de vantagens</p></div>
+      <div class="tl"><div class="dot">jul</div><h3>Ritual</h3><p>Primeira caixa do clube</p></div>
+      <div class="tl"><div class="dot">ago</div><h3>Revenda</h3><p>Primeiras lojas parceiras</p></div>
+      <div class="tl"><div class="dot">dez</div><h3>Natal</h3><p>Planners, presentes e empresas</p></div>
+    </div>
+  </section>
+
+  <!-- 9 · O papel dela -->
+  <section class="slide">
+    <span class="eyebrow">Onde você entra</span>
+    <h2>A Vanilla Flor tem a sua <em>voz</em></h2>
+    <div class="roles">
+      <div class="role"><div class="n">i</div><h3>Embaixadora</h3><p>O rosto e a voz da marca: rotina de planejamento, bastidores e o vídeo de abrir a caixa.</p><div class="ask">Como você se sente aparecendo?</div></div>
+      <div class="role"><div class="n">ii</div><h3>Curadora</h3><p>Quem escolhe os temas do clube, prova os produtos e escreve a carta de cada caixa.</p><div class="ask">Que temas você imagina?</div></div>
+      <div class="role"><div class="n">iii</div><h3>Ponte</h3><p>A conexão com as professoras: as primeiras consultoras e uma linha pensada para elas.</p><div class="ask">Quem seriam as primeiras?</div></div>
+    </div>
+  </section>
+
+  <!-- 10 · Decidir juntos -->
+  <section class="slide">
+    <span class="eyebrow">Para decidirmos juntos</span>
+    <h2>As nossas <em>escolhas</em></h2>
+    <ol class="decisions" id="decisions">
+      <li><span>Quanto tempo você consegue dedicar?<small>Conteúdo, curadoria e as caixas, ao lado da escola</small></span></li>
+      <li><span>Você quer aparecer pelo nome e pelo rosto?<small>"Carta da Renata", vídeos, Instagram</small></span></li>
+      <li><span>"Ritual do Mês" combina com você?<small>Nome e temas do clube</small></span></li>
+      <li><span>Vamos chamar as primeiras consultoras professoras?<small>Colegas que amam papelaria</small></span></li>
+      <li><span>Começamos o Instagram agora?<small>Quatro meses de audiência antes de abrir a loja</small></span></li>
+    </ol>
+  </section>
+
+  <!-- 11 · Próximos passos -->
+  <section class="slide">
+    <span class="eyebrow">Até março, sem gastar</span>
+    <h2>Os próximos <em>passos</em></h2>
+    <div class="steps" id="steps">
+      <div class="step"><span class="t">Criar o Instagram e começar os bastidores</span><button class="owner">Quem?</button></div>
+      <div class="step"><span class="t">Divulgar a lista VIP</span><button class="owner">Quem?</button></div>
+      <div class="step"><span class="t">Conversar com as empresas da nossa rede</span><button class="owner">Quem?</button></div>
+      <div class="step"><span class="t">Mapear influenciadoras e consultoras</span><button class="owner">Quem?</button></div>
+      <div class="step"><span class="t">Pedir amostras com os contatos na China e nos EUA</span><button class="owner">Quem?</button></div>
+      <div class="step"><span class="t">Listar papelarias boutique para a revenda</span><button class="owner">Quem?</button></div>
+      <div class="step"><span class="t">Corrigir e vetorizar a logo</span><button class="owner">Quem?</button></div>
+      <div class="step"><span class="t">Imaginar os temas do primeiro semestre do clube</span><button class="owner">Quem?</button></div>
+    </div>
+    <p class="hint">Toque em "Quem?" para escolher: Renata · Bruno · Juntos</p>
+  </section>
+
+  <!-- 12 · Fechamento -->
+  <section class="slide center end">
+    <div class="script big">Vanilla Flor</div>
+    <h2 style="margin-top:40px">Vamos <em>juntos</em>?</h2>
+    <p class="lead">Papelaria afetiva &amp; estética. Feita com calma, com carinho, e a quatro mãos.</p>
+  </section>
+
+</div>
+
+<div id="bar">
+  <button id="prev" aria-label="Tela anterior">←</button>
+  <span class="count" id="count">1 / 12</span>
+  <button id="next" aria-label="Próxima tela">→</button>
+  <button id="fs">Tela cheia</button>
+</div>
+
+<script>
+  const stage = document.getElementById('stage');
+  const slides = [...document.querySelectorAll('.slide')];
+  let cur = 0;
+
+  // escala o palco 1920×1080 para caber na tela (TV, notebook ou celular)
+  function fit() {
+    const s = Math.min(innerWidth / 1920, innerHeight / 1080);
+    stage.style.transform = `translate(-50%, -50%) scale(${s})`;
+  }
+  addEventListener('resize', fit); fit();
+
+  function show(i) {
+    cur = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((s, k) => s.classList.toggle('on', k === cur));
+    document.getElementById('count').textContent = `${cur + 1} / ${slides.length}`;
+    document.getElementById('progress').style.width = `${((cur + 1) / slides.length) * 100}%`;
+    history.replaceState(null, '', '#' + (cur + 1));
+  }
+  const next = () => show(cur + 1), prev = () => show(cur - 1);
+
+  addEventListener('keydown', e => {
+    if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); next(); }
+    else if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); prev(); }
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(slides.length - 1);
+    else if (e.key.toLowerCase() === 'f') toggleFs();
+  });
+  // clique na metade direita avança, na esquerda volta (exceto em botões e itens clicáveis)
+  stage.addEventListener('click', e => {
+    if (e.target.closest('a, button, .decisions li')) return;
+    const r = stage.getBoundingClientRect();
+    (e.clientX - r.left > r.width / 2) ? next() : prev();
+  });
+  document.getElementById('next').onclick = next;
+  document.getElementById('prev').onclick = prev;
+
+  function toggleFs() {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen?.().catch(() => {});
+    else document.exitFullscreen?.();
+  }
+  document.getElementById('fs').onclick = toggleFs;
+  document.addEventListener('fullscreenchange', () => { document.getElementById('fs').textContent = document.fullscreenElement ? 'Sair da tela cheia' : 'Tela cheia'; });
+
+  // barra e cursor aparecem ao mexer o mouse e somem sozinhos
+  let t;
+  addEventListener('mousemove', () => {
+    document.body.classList.add('show-ui'); document.body.classList.remove('hide-cursor');
+    clearTimeout(t); t = setTimeout(() => { document.body.classList.remove('show-ui'); document.body.classList.add('hide-cursor'); }, 2200);
+  });
+
+  // decisões: clique marca como decidida
+  document.querySelectorAll('#decisions li').forEach(li => li.addEventListener('click', () => li.classList.toggle('done')));
+  // próximos passos: clique alterna o responsável
+  const donos = [['', 'Quem?'], ['renata', 'Renata'], ['bruno', 'Bruno'], ['juntos', 'Juntos']];
+  document.querySelectorAll('#steps .owner').forEach(b => {
+    let k = 0;
+    b.addEventListener('click', () => { k = (k + 1) % donos.length; b.className = 'owner ' + donos[k][0]; b.textContent = donos[k][1]; });
+  });
+
+  show((parseInt(location.hash.slice(1), 10) || 1) - 1);
+</script>
+</body>
+</html>
